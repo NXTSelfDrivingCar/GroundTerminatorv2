@@ -11,4 +11,10 @@
         android:layout_height="wrap_content"
         android:text="Oooooh weee rick"/>
 
+    <Button
+        android:id="@+id/btnGoBack"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:text="Go Back"
+        />
 </LinearLayout>
