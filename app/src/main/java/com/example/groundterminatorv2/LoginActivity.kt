@@ -10,13 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 class LoginActivity : AppCompatActivity() {
 
 
-    private val btnLogIn = findViewById<Button>(R.id.btnlog)
-    private val etUsername = findViewById<EditText>(R.id.editTextTextEmailAddress)
-    private val etPassword = findViewById<EditText>(R.id.editTextTextPassword)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val btnLogIn = findViewById<Button>(R.id.btnlog)
+        val etUsername = findViewById<EditText>(R.id.editTextTextEmailAddress)
+        val etPassword = findViewById<EditText>(R.id.editTextTextPassword)
 
         btnLogIn.setOnClickListener {
             Toast.makeText(this, "Button pressed.", Toast.LENGTH_SHORT).show()
