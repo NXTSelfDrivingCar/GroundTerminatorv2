@@ -17,10 +17,8 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.Serializable
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import kotlinx.serialization.serializer
+
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +27,7 @@ class LoginActivity : AppCompatActivity() {
 
         val client = HttpClient(CIO){
             install(ContentNegotiation){
-
+                serializer = KotlinxSerializer()
             }
         }
         val btnlog = findViewById<Button>(R.id.btnlog)
@@ -57,3 +55,19 @@ class LoginActivity : AppCompatActivity() {
     @Serializable
     data class logInfo(val un: String, val pw: String)
 }
+
+
+//import java.net.URI
+//import java.net.http.HttpClient
+//import java.net.http.HttpRequest
+//import java.net.http.HttpResponse
+//
+//fun main() {
+//    val client = HttpClient.newBuilder().build();
+//    val request = HttpRequest.newBuilder()
+//        .uri(URI.create("http://webcode.me"))
+//        .build();
+//
+//    val response = client.send(request, HttpResponse.BodyHandlers.ofString());
+//    println(response.body())
+//}
