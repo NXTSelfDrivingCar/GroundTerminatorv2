@@ -1,73 +1,82 @@
 package com.example.groundterminatorv2
 
-import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.Camera
 import android.os.Bundle
+import android.os.StrictMode
+import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatEditText
-import com.example.groundterminatorv2.CameraActivity
-import com.example.groundterminatorv2.R
-import com.google.android.material.textfield.TextInputEditText
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.serializer
+//import androidx.navigation.findNavController
+//import androidx.navigation.ui.AppBarConfiguration
+//import androidx.navigation.ui.setupActionBarWithNavController
+//import com.example.groundterminatorv2.databinding.ActivityLogInPage2Binding
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.DataOutputStream
+import java.net.URL
 
 
 class LoginActivity : AppCompatActivity() {
+//    private lateinit var appBarConfiguration: AppBarConfiguration
+//    private lateinit var binding: ActivityLogInPage2Binding
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    super.onCreate(savedInstanceState)
+//        binding = ActivityLogInPage2Binding.inflate(layoutInflater)
+    setContentView(R.layout.activity_main)
+//
+//        setSupportActionBar(binding.toolbar)
 
-        val client = HttpClient(CIO){
-            install(ContentNegotiation){
-                serializer = KotlinxSerializer()
+        val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy)
+
+    }
+
+    fun logInButton(v: View) {
+        val usernameValue: EditText = findViewById<EditText>(R.id.etEmail)
+        val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
+
+
+        if (!usernameValue.text.isEmpty() && !passwordValue.text.isEmpty()) {
+            val url = URL("http://192.168.1.101:5000/user/login/mobile")
+            val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
+
+            val conn = url.openConnection()
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+            conn.setRequestProperty("Content-Length", postData.length.toString())
+            var odgovor: JSONObject? = null
+            DataOutputStream(conn.getOutputStream()).use { it.writeBytes(postData) }
+            BufferedReader(InputStreamReader(conn.getInputStream())).use { bf ->
+                var line: String?
+                while (bf.readLine().also { line = it } != null) {
+                    Log.d("NXT login", line as String) // Ovo ispisuje sta server kaze
+                    odgovor=JSONObject(line)
+                }
             }
-        }
-        val btnlog = findViewById<Button>(R.id.btnlog)
-        val usernameField = findViewById<EditText>(R.id.editTextTextEmailAddress)
-        val passField = findViewById<EditText>(R.id.editTextTextPassword)
-        btnlog.setOnClickListener {
-            Toast.makeText(this, "Button pressed.", Toast.LENGTH_SHORT).show()
-            println("ABCD ${passField.text}  ${usernameField.text}")
-
-//            val url = URL("http://localhost:5000")
-//            with(url.openConnection() as HttpURLConnection)
-//            {
-//                requestMethod = "GET"
-//                println("\n Sent 'GET' request to URL : $url; Response Code : $responseCode")
-//            if ( green light servera ) {
-//                val logIntentCam = Intent(this, CameraActivity::class.java)
-//                startActivity(logIntentCam)
-//                finish()
-//            } else
-//                Toast.makeText(this, "Credentials invalid.", Toast.LENGTH_SHORT).show()
-//            }
+            var status = odgovor!!.get("status").toString()
+            Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+            if(status == "OK")
+            {
+                val intent = Intent(this, CameraActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+            else
+                Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
         }
     }
 
-    @Serializable
-    data class logInfo(val un: String, val pw: String)
+    fun RegisterButton (v: View)
+    {
+        val intent = Intent(this, RegisterActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+    //убићу се јебено
 }
-
-
-//import java.net.URI
-//import java.net.http.HttpClient
-//import java.net.http.HttpRequest
-//import java.net.http.HttpResponse
-//
-//fun main() {
-//    val client = HttpClient.newBuilder().build();
-//    val request = HttpRequest.newBuilder()
-//        .uri(URI.create("http://webcode.me"))
-//        .build();
-//
-//    val response = client.send(request, HttpResponse.BodyHandlers.ofString());
-//    println(response.body())
-//}

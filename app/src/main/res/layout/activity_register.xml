@@ -5,10 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/login_bg"
-    android:gravity="center"
-    android:orientation="vertical"
-    tools:context=".LoginActivity"
-    >
+    tools:context=".RegisterActivity">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -35,10 +32,19 @@
                 android:layout_marginTop="20dp"
                 android:fontFamily="serif-monospace"
                 android:gravity="center"
-                android:text="Enter your username and password"
+                android:text="Enter your credentials"
                 android:textColor="@color/black"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/etUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:ems="10"
+                android:hint="Username"
+                android:inputType="text" />
 
             <EditText
                 android:id="@+id/etEmail"
@@ -47,34 +53,34 @@
                 android:layout_marginTop="20dp"
                 android:ems="10"
                 android:hint="Email"
-                android:inputType="textEmailAddress" />
+                android:inputType="textAutoComplete" />
 
             <EditText
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:layout_marginTop="20dp"
+                android:ems="10"
                 android:hint="Password"
                 android:inputType="textPassword" />
 
-            <Button
-                android:id="@+id/btnlog"
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/etConfirmPassword"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
                 android:layout_marginTop="20dp"
-                android:text="log in"
-                android:onClick="logInButton"/>
+                android:ems="10"
+                android:hint="Confirm password"
+                android:inputType="textPassword" />
 
-            <TextView
-                android:id="@+id/tvRegister"
+            <Button
+                android:id="@+id/btnReg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Register"
                 android:layout_gravity="center"
-                android:onClick="RegisterButton"/>
+                android:layout_marginTop="20dp"
+                android:onClick="btnRegClicked"
+                android:text="Register"/>
 
         </LinearLayout>
 
