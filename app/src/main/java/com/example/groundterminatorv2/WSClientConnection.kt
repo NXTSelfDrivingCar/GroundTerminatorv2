@@ -11,6 +11,7 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.websocket.*
+import io.socket.client.IO
 import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 
@@ -24,20 +25,13 @@ class WSClientConnection : AppCompatActivity() {
     fun onConnectionClick(v: View){
 
         Log.d("WSConnecion", "Installing http client")
-        val client = HttpClient(CIO){
-            install(WebSockets){
-                pingInterval = 20_000
-            }
-        }
-        Log.d("WSConnection", "Connecting to WS Server")
-        runBlocking {
-            client.webSocket(method = HttpMethod.Get, host = "192.168.0.23", port = 5001) {
-//                Log.d("WSConnection", "Connected to WS Server")
-//                while(true) {
-//                    val othersMessage = incoming.receive() as? Frame.Text
-//                    println(othersMessage?.readText())
-//                }
-            }
+        val mSoc = IO.socket("http://192.168.0.23:5001");
+        mSoc.connect();
+
+        Log.d("WSConnection", "Connected");
+
+        while (true){
+            mSoc.emit("message", "message from and")
         }
     }
 }
