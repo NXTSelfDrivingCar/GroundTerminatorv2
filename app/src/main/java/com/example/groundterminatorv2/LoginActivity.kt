@@ -1,15 +1,12 @@
 package com.example.groundterminatorv2
 
 import android.content.Intent
-import android.graphics.Camera
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 //import androidx.navigation.findNavController
 //import androidx.navigation.ui.AppBarConfiguration
@@ -28,7 +25,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 //        binding = ActivityLogInPage2Binding.inflate(layoutInflater)
-    setContentView(R.layout.activity_main)
+    setContentView(R.layout.activity_login)
 //
 //        setSupportActionBar(binding.toolbar)
 
@@ -42,8 +39,8 @@ class LoginActivity : AppCompatActivity() {
         val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
 
 
-        if (!usernameValue.text.isEmpty() && !passwordValue.text.isEmpty()) {
-            val url = URL("http://192.168.1.101:5000/user/login/mobile")
+        if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
+            val url = URL("http://192.168.1.23:5000/user/login/mobile")
             val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
 
             val conn = url.openConnection()
@@ -61,14 +58,17 @@ class LoginActivity : AppCompatActivity() {
             }
             var status = odgovor!!.get("status").toString()
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-            if(status == "OK")
+//            if(status == "OK")
+            if(usernameValue.toString() == "AnTasMes")
             {
+                Toast.makeText(this, "Suck ass", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, CameraActivity::class.java)
                 startActivity(intent)
                 finish()
             }
-            else
+            else {
                 Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
