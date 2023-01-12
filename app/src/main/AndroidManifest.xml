@@ -17,14 +17,11 @@
         android:theme="@style/Theme.GroundTerminatorV2"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity android:name=".CameraActivity"
+            android:exported="false" />
         <activity
             android:name=".UsernameChangeActivity"
             android:exported="false" />
-        <activity
-            android:name=".TestActivity"
-            android:exported="false"
-            android:label="@string/title_activity_test"
-            android:theme="@style/Theme.GroundTerminatorV2.NoActionBar" />
         <activity
             android:name=".PasswordChangeActivity"
             android:exported="false" />
@@ -43,7 +40,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CameraActivity" />
     </application>
 
 </manifest>

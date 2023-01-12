@@ -25,6 +25,12 @@ class PasswordChangeActivity : AppCompatActivity() {
         val currentPass : EditText = findViewById<EditText>(R.id.etCurrentPass)
         val newPass : EditText = findViewById<EditText>(R.id.etNewPass)
         val confirmNewPass : EditText = findViewById<EditText>(R.id.etConfirmNewPass)
+//RAZLIKA
+        if(currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass))
+        {
+            val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
+            val postData = "currentPassword" + currentPass.text + "&newPassword" + newPass.text
+            
         if(true)
 //        if(currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass))
         {
@@ -32,6 +38,7 @@ class PasswordChangeActivity : AppCompatActivity() {
 
             val postData = "tkn=" + CurrentUser.token
             //val postData = "currentPassword=" + currentPass.text + "&newPassword=" + newPass.text
+//>>>>>>> test
 
             val conn = url.openConnection()
             conn.doOutput = true
