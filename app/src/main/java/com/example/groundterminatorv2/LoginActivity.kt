@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
 //import androidx.navigation.findNavController
 //import androidx.navigation.ui.AppBarConfiguration
 //import androidx.navigation.ui.setupActionBarWithNavController
@@ -18,8 +19,14 @@ import java.io.InputStreamReader
 import java.io.DataOutputStream
 import java.net.URL
 import com.example.groundterminatorv2.shared.CurrentUser
-import com.example.groundterminatorv2.httpHandler.HTTPHandler
 import com.example.groundterminatorv2.httpHandler.HTTPResponse
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -41,9 +48,27 @@ class LoginActivity : AppCompatActivity() {
         val usernameValue: EditText = findViewById<EditText>(R.id.etEmail)
         val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
 
-
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
-            val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
+
+//            val client = HttpClient(CIO)
+//
+//            val response: HttpResponse = client.request("http://192.168.104.58:5000/user/login/mobile"){
+//                method = HttpMethod.Post
+//                headers {
+//                    append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
+//                }
+//                url {
+//                    parameters.append("username", usernameValue.text.toString())
+//                    parameters.append("password", passwordValue.text.toString())
+//                }
+//            }
+//
+//            Log.d("NXT", response.body())
+
+            var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
+
+            val postData = params.map {(k, v) -> "${(k)}=${v}"}
+                .joinToString("&")
 
             var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
 
@@ -66,7 +91,7 @@ class LoginActivity : AppCompatActivity() {
             }
 
             if(extractedToken == null) {
-                return;
+                Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
             }
 
             Log.d("NXT Login token", extractedToken!!)
@@ -77,7 +102,7 @@ class LoginActivity : AppCompatActivity() {
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
             if(status == "OK")
             {
-                Toast.makeText(this, "Suck ass", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Logged in", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, PasswordChangeActivity::class.java)
                 startActivity(intent)
                 finish()
@@ -94,5 +119,4 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    //убићу се јебено
 }

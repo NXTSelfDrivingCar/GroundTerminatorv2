@@ -21,18 +21,14 @@
             android:name=".UsernameChangeActivity"
             android:exported="false" />
         <activity
-            android:name=".TestActivity"
-            android:exported="false"
-            android:label="@string/title_activity_test"
-            android:theme="@style/Theme.GroundTerminatorV2.NoActionBar" />
-        <activity
             android:name=".PasswordChangeActivity"
             android:exported="false" />
         <activity
             android:name=".RegisterActivity"
             android:exported="false"
-            android:label="@string/title_activity_register"
-            android:theme="@style/Theme.GroundTerminatorV2.NoActionBar" />
+            android:label="@string/title_activity_register"/>
+<!--            android:theme="@style/Theme.GroundTerminatorV2.NoActionBar" />-->
+
         <activity
             android:name=".LoginActivity"
             android:exported="true"
