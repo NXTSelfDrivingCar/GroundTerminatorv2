@@ -49,13 +49,15 @@ class LoginActivity : AppCompatActivity() {
 
             // Gets login status { OK | Unauthorized }
             var status = response.content.get("status")
+
+            // Gets header cookie { JWT }
             var headerCookie = response.conn.headerFields["set-cookie"]
 
             Log.d("NXT Login status", status as String)
-            // Gets token from header
 
             var extractedToken: String? = null
 
+            // Handles token, and extracts just authorization part
             for(cookie in headerCookie!!){
                 Log.d("NXT Login cookie loop", cookie as String)
                 if(cookie.startsWith("auth=")){

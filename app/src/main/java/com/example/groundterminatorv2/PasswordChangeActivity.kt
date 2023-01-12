@@ -13,6 +13,8 @@ import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
 import java.net.URL
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
+import com.example.groundterminatorv2.httpHandler.HTTPResponse
 
 class PasswordChangeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,31 +27,20 @@ class PasswordChangeActivity : AppCompatActivity() {
         val currentPass : EditText = findViewById<EditText>(R.id.etCurrentPass)
         val newPass : EditText = findViewById<EditText>(R.id.etNewPass)
         val confirmNewPass : EditText = findViewById<EditText>(R.id.etConfirmNewPass)
+
+//        if(currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass.text))
         if(true)
-//        if(currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass))
         {
-            val url = URL("http://192.168.0.23:5000/user/update/mobile")
+            val postData = "token=" + CurrentUser.token + "&newPassword=" + newPass.text + "&currPassword=" + currentPass.text
 
-            val postData = "tkn=" + CurrentUser.token
-            //val postData = "currentPassword=" + currentPass.text + "&newPassword=" + newPass.text
+            var response: HTTPResponse = HTTPHandler.handlePostMethod("/user/update/mobile", postData)
 
-            val conn = url.openConnection()
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-            conn.setRequestProperty("Content-Length", postData.length.toString())
-            var odgovor: JSONObject? = null
-            DataOutputStream(conn.getOutputStream()).use { it.writeBytes(postData) }
-            BufferedReader(InputStreamReader(conn.getInputStream())).use { bf ->
-                var line: String?
-                while (bf.readLine().also { line = it } != null) {
-                    Log.d("NXT login", line as String) // Ovo ispisuje sta server kaze
-                    odgovor= JSONObject(line)
-                }
-            }
-            var status = odgovor!!.get("status").toString()
+            var status = response.content.get("status").toString()
+
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
             if(status == "OK")
             {
+                // Promeni intent
                 val intent = Intent(this, CameraActivity::class.java)
                 startActivity(intent)
                 finish()
