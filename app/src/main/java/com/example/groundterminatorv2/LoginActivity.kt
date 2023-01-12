@@ -43,6 +43,9 @@ class LoginActivity : AppCompatActivity() {
 
 
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
+
+            val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
+
             val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
 
             var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
@@ -75,6 +78,9 @@ class LoginActivity : AppCompatActivity() {
             CurrentUser.token = extractedToken
 
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+
+//          if(usernameValue.toString() == "AnTasMes")
+
             if(status == "OK")
             {
                 Toast.makeText(this, "Suck ass", Toast.LENGTH_SHORT).show()
@@ -94,5 +100,4 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    //убићу се јебено
 }
