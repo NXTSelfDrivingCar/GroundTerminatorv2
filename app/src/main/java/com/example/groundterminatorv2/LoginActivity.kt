@@ -17,6 +17,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.DataOutputStream
 import java.net.URL
+import com.example.groundterminatorv2.shared.CurrentUser
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
+import com.example.groundterminatorv2.httpHandler.HTTPResponse
 
 
 class LoginActivity : AppCompatActivity() {
@@ -40,30 +43,46 @@ class LoginActivity : AppCompatActivity() {
 
 
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
+
             val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
+
             val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
 
-            val conn = url.openConnection()
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-            conn.setRequestProperty("Content-Length", postData.length.toString())
-            var odgovor: JSONObject? = null
-            DataOutputStream(conn.getOutputStream()).use { it.writeBytes(postData) }
-            BufferedReader(InputStreamReader(conn.getInputStream())).use { bf ->
-                var line: String?
-                while (bf.readLine().also { line = it } != null) {
-                    Log.d("NXT login", line as String) // Ovo ispisuje sta server kaze
-                    odgovor=JSONObject(line)
+            var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+
+            // Gets login status { OK | Unauthorized }
+            var status = response.content.get("status")
+            var headerCookie = response.conn.headerFields["set-cookie"]
+
+            Log.d("NXT Login status", status as String)
+            // Gets token from header
+
+            var extractedToken: String? = null
+
+            for(cookie in headerCookie!!){
+                Log.d("NXT Login cookie loop", cookie as String)
+                if(cookie.startsWith("auth=")){
+                    extractedToken = cookie.split(";")[0].replace("auth=", "")
                 }
             }
-            var status = odgovor!!.get("status").toString()
+
+            if(extractedToken == null) {
+                return;
+            }
+
+            Log.d("NXT Login token", extractedToken!!)
+
+            // Setting up the current user of the app
+            CurrentUser.token = extractedToken
+
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
 
 //          if(usernameValue.toString() == "AnTasMes")
+
             if(status == "OK")
             {
                 Toast.makeText(this, "Suck ass", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, CameraActivity::class.java)
+                val intent = Intent(this, PasswordChangeActivity::class.java)
                 startActivity(intent)
                 finish()
             }
