@@ -24,10 +24,9 @@ class PasswordChangeActivity : AppCompatActivity() {
         val currentPass : EditText = findViewById<EditText>(R.id.etCurrentPass)
         val newPass : EditText = findViewById<EditText>(R.id.etNewPass)
         val confirmNewPass : EditText = findViewById<EditText>(R.id.etConfirmNewPass)
-
         if(currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass))
         {
-            val url = URL("http://192.168.1.101:5000/user/login/mobile")
+            val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
             val postData = "currentPassword" + currentPass.text + "&newPassword" + newPass.text
 
             val conn = url.openConnection()

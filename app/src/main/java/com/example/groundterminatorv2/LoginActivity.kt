@@ -40,7 +40,7 @@ class LoginActivity : AppCompatActivity() {
 
 
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
-            val url = URL("http://192.168.1.23:5000/user/login/mobile")
+            val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
             val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
 
             val conn = url.openConnection()
@@ -58,8 +58,9 @@ class LoginActivity : AppCompatActivity() {
             }
             var status = odgovor!!.get("status").toString()
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-//            if(status == "OK")
-            if(usernameValue.toString() == "AnTasMes")
+
+//          if(usernameValue.toString() == "AnTasMes")
+            if(status == "OK")
             {
                 Toast.makeText(this, "Suck ass", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, CameraActivity::class.java)
@@ -78,5 +79,4 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    //убићу се јебено
 }
