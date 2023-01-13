@@ -22,39 +22,36 @@ class PasswordChangeActivity : AppCompatActivity() {
         setContentView(R.layout.activity_password_change)
     }
 
-    fun confirmButton(v: View)
-    {
-        val currentPass : EditText = findViewById<EditText>(R.id.etCurrentPass)
-        val newPass : EditText = findViewById<EditText>(R.id.etNewPass)
-        val confirmNewPass : EditText = findViewById<EditText>(R.id.etConfirmNewPass)
+    fun confirmButton(v: View) {
+        val currentPass: EditText = findViewById<EditText>(R.id.etCurrentPass)
+        val newPass: EditText = findViewById<EditText>(R.id.etNewPass)
+        val confirmNewPass: EditText = findViewById<EditText>(R.id.etConfirmNewPass)
 
-      if(currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass.text))
-      {
+        if (true){//currentPass.text.isNotEmpty() && newPass.text.isNotEmpty() && confirmNewPass.text.isNotEmpty() && newPass.text.equals(confirmNewPass.text)) {
             val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
-            val postData = "currentPassword" + currentPass.text + "&newPassword" + newPass.text
-            
-        if(true)
-        {
-            val postData = "token=" + CurrentUser.token + "&newPassword=" + newPass.text + "&currPassword=" + currentPass.text
+            val postData: String =
+                "type=password&value=" + newPass.text + "&token=" + CurrentUser.token
 
-            var response: HTTPResponse = HTTPHandler.handlePostMethod("/user/update/mobile", postData)
+            if (true) {
+                val postData =
+                    "token=" + CurrentUser.token + "&newPassword=" + newPass.text + "&currPassword=" + currentPass.text
 
-            var status = response.content.get("status").toString()
+                var response: HTTPResponse =
+                    HTTPHandler.handlePostMethod("/user/update/mobile", postData)
 
-            Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-            if(status == "OK")
-            {
-                // Promeni intent
-                val intent = Intent(this, CameraActivity::class.java)
-                startActivity(intent)
-                finish()
-            }
-            else if(status == "PassIncorrect")
-            {
-                Toast.makeText(this, "Current password is incorrect.", Toast.LENGTH_SHORT).show()
-            }
-            else
+                var status = response.content.get("status").toString()
+
                 Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+                if (status == "OK") {
+                    val intent = Intent(this, CameraActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                } else if (status == "PassIncorrect") {
+                    Toast.makeText(this, "Current password is incorrect.", Toast.LENGTH_SHORT)
+                        .show()
+                } else
+                    Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

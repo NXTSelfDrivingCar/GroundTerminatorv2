@@ -29,21 +29,23 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Change your username"
+                android:text="Change your Email"
                 android:layout_gravity="center"
                 android:fontFamily="sans-serif-condensed"
                 android:textSize="20sp"
                 android:textColor="@color/prussian_blue"/>
 
-            <EditText
-                android:id="@+id/etNewUsername"
-                android:fontFamily="sans-serif-condensed-light"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:hint="Enter new username"/>
 
             <EditText
-                android:id="@+id/etCurrentPass"
+                android:id="@+id/etNewEmail"
+                android:fontFamily="sans-serif-condensed-light"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter new Email"
+                android:inputType="textPassword"/>
+
+            <EditText
+                android:id="@+id/etConfirmNewPass"
                 android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

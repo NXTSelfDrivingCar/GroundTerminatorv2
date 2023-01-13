@@ -46,7 +46,7 @@
                 android:layout_marginTop="20dp"
                 android:ems="10"
                 android:fontFamily="sans-serif-condensed-light"
-                android:hint="Email"
+                android:hint="Username"
                 android:inputType="textEmailAddress" />
 
             <EditText
@@ -73,19 +73,21 @@
 
     </androidx.cardview.widget.CardView>
 
-    <TextView
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="150dp"
         android:fontFamily="sans-serif-condensed-light"
-        android:onClick="RegisterButton"
+        android:onClick="registerButton"
         android:text="Register"
         android:textColor="@color/white"
+        android:backgroundTint="@color/prussian_blue"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
+        app:layout_constraintTop_toBottomOf="@+id/cardView"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

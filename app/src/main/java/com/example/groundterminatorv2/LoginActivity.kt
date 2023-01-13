@@ -44,8 +44,6 @@ class LoginActivity : AppCompatActivity() {
 
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
 
-            val url = URL("http://nxt-its.duckdns.org:5000/user/login/mobile")
-
             val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
 
             var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
@@ -83,8 +81,8 @@ class LoginActivity : AppCompatActivity() {
 
             if(status == "OK")
             {
-                Toast.makeText(this, "Suck ass", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, PasswordChangeActivity::class.java)
+                Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, CameraActivity::class.java)
                 startActivity(intent)
                 finish()
             }
@@ -94,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    fun RegisterButton (v: View)
+    fun registerButton (v: View)
     {
         val intent = Intent(this, RegisterActivity::class.java)
         startActivity(intent)
