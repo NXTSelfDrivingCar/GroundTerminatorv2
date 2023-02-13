@@ -38,58 +38,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     fun logInButton(v: View) {
-        val usernameValue: EditText = findViewById<EditText>(R.id.etEmail)
-        val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
 
-
-        if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
-
-            val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
-
-            var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
-
-            // Gets login status { OK | Unauthorized }
-            var status = response.content.get("status")
-
-            // Gets header cookie { JWT }
-            var headerCookie = response.conn.headerFields["set-cookie"]
-
-            Log.d("NXT Login status", status as String)
-
-            var extractedToken: String? = null
-
-            // Handles token, and extracts just authorization part
-            for(cookie in headerCookie!!){
-                Log.d("NXT Login cookie loop", cookie as String)
-                if(cookie.startsWith("auth=")){
-                    extractedToken = cookie.split(";")[0].replace("auth=", "")
-                }
-            }
-
-            if(extractedToken == null) {
-                return;
-            }
-
-            Log.d("NXT Login token", extractedToken!!)
-
-            // Setting up the current user of the app
-            CurrentUser.token = extractedToken
-
-            Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-
-//          if(usernameValue.toString() == "AnTasMes")
-
-            if(status == "OK")
+            if(/*status == "OK"*/true)
             {
                 Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, CameraActivity::class.java)
                 startActivity(intent)
                 finish()
             }
-            else {
-                Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-            }
-        }
+
     }
 
     fun registerButton (v: View)
