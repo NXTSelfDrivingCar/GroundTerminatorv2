@@ -83,6 +83,10 @@ class LoginActivity : AppCompatActivity() {    override fun onCreate(savedInstan
             var extractedToken: String? = null
 
             // Handles token, and extracts just authorization part
+            if(headerCookie == null) {
+                Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
+                return
+            }
             for(cookie in headerCookie!!){
                 Log.d("NXT Login cookie loop", cookie as String)
                 if(cookie.startsWith("auth=")){
@@ -92,6 +96,7 @@ class LoginActivity : AppCompatActivity() {    override fun onCreate(savedInstan
 
             if(extractedToken == null) {
                 Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
+                return
             }
 
             Log.d("NXT Login token", extractedToken!!)
@@ -103,7 +108,7 @@ class LoginActivity : AppCompatActivity() {    override fun onCreate(savedInstan
             if(status == "loginComplete")
             {
                 Toast.makeText(this, "Logged in", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, PasswordChangeActivity::class.java)
+                val intent = Intent(this, CameraActivity::class.java)
                 startActivity(intent)
                 finish()
             }

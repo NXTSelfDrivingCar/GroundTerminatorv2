@@ -32,7 +32,7 @@ class RegisterActivity : AppCompatActivity() {
         if (usernameValue.text.isNotEmpty() && emailValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()
             && confirmPasswordValue.text.isNotEmpty() && passwordValue.text.equals(confirmPasswordValue.text.toString()))
         {
-            val url = URL("http://192.168.1.101:5000/user/register/mobile")
+            val url = URL("http://192.168.1.23:5000/user/register/mobile")
             val postData =
                 "username=" + usernameValue.text + "&password=" + passwordValue.text + "&email=" + emailValue.text
 
