@@ -23,7 +23,7 @@ class WSClientConnection : AppCompatActivity() {
 
     fun onConnectionClick(v: View){
 
-        Log.d("WSConnecion", "Installing http client")
+        Log.d("WSConnection", "Installing http client")
         val client = HttpClient(CIO){
             install(WebSockets){
                 pingInterval = 20_000

@@ -28,12 +28,13 @@ class RegisterActivity : AppCompatActivity() {
         val confirmPasswordValue: EditText = findViewById(R.id.etConfirmPassword)
 
         // SREDITI OVO OVDE DA MU MAMU NE BIH JEBAO ZNACI NE RADI NISTA KAKO TRBEA
-        if(true)
-//        if (usernameValue.text.isNotEmpty() && emailValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()
-//            && confirmPasswordValue.text.isNotEmpty() && passwordValue.equals(confirmPasswordValue.text.toString()))
+//        if (true)
+        if (usernameValue.text.isNotEmpty() && emailValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()
+            && confirmPasswordValue.text.isNotEmpty() && passwordValue.text.equals(confirmPasswordValue.text.toString()))
         {
-//            val url = URL("http://192.168.1.101:5000/user/register/mobile")
-            val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text + "&email=" + emailValue.text
+            val url = URL("http://192.168.1.101:5000/user/register/mobile")
+            val postData =
+                "username=" + usernameValue.text + "&password=" + passwordValue.text + "&email=" + emailValue.text
 
             var response = HTTPHandler.handlePostMethod("/user/register/mobile", postData)
 
@@ -47,4 +48,5 @@ class RegisterActivity : AppCompatActivity() {
             } else
                 Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
         }
-    }}
+    }
+}
