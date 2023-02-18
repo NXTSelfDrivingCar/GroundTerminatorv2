@@ -45,7 +45,7 @@
                 android:inputType="textPassword"/>
 
             <EditText
-                android:id="@+id/etConfirmNewPass"
+                android:id="@+id/etPassword"
                 android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

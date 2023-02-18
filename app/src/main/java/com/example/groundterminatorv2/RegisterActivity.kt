@@ -27,26 +27,36 @@ class RegisterActivity : AppCompatActivity() {
         val passwordValue: EditText = findViewById(R.id.etPassword)
         val confirmPasswordValue: EditText = findViewById(R.id.etConfirmPassword)
 
-        // SREDITI OVO OVDE DA MU MAMU NE BIH JEBAO ZNACI NE RADI NISTA KAKO TRBEA
-//        if (true)
-        if (usernameValue.text.isNotEmpty() && emailValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()
-            && confirmPasswordValue.text.isNotEmpty() && passwordValue.text.equals(confirmPasswordValue.text.toString()))
+        Log.d("prazno", (usernameValue.text.isEmpty() || emailValue.text.isEmpty() || passwordValue.text.isEmpty() || confirmPasswordValue.text.isEmpty()).toString())
+        if(usernameValue.text.isEmpty() || emailValue.text.isEmpty() || passwordValue.text.isEmpty() || confirmPasswordValue.text.isEmpty())
         {
-            val url = URL("http://192.168.1.23:5000/user/register/mobile")
-            val postData =
-                "username=" + usernameValue.text + "&password=" + passwordValue.text + "&email=" + emailValue.text
-
-            var response = HTTPHandler.handlePostMethod("/user/register/mobile", postData)
-
-            var status = response.content.get("status").toString()
-
-            Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-            if (status == "OK") {
-                val intent = Intent(this, LoginActivity::class.java)
-                startActivity(intent)
-                finish()
-            } else
-                Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Polje je prazno.", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        Log.d("passCheck", (passwordValue.text.toString() == confirmPasswordValue.text.toString()).toString())
+        if(!(passwordValue.text.toString().equals(confirmPasswordValue.text.toString())))
+        {
+            Toast.makeText(this, "Sifre se ne podudaraju.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text + "&email=" + emailValue.text
+
+//        var response = HTTPHandler.handlePostMethod("/user/register/mobile", postData)
+        var response = HTTPHandler.handlePostMethod("/user/register/mobile", postData)
+
+        var status = response.content.get("status").toString()
+        Log.d("statusCheck", status)
+
+
+
+        Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+        if (status == "registrationComplete") {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else
+            Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
     }
 }

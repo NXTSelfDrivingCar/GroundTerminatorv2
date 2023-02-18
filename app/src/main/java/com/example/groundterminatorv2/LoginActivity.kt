@@ -29,7 +29,8 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 
 
-class LoginActivity : AppCompatActivity() {    override fun onCreate(savedInstanceState: Bundle?) {
+class LoginActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
 
     //    private lateinit var appBarConfiguration: AppBarConfiguration
 //    private lateinit var binding: ActivityLogInPage2Binding
@@ -67,8 +68,7 @@ class LoginActivity : AppCompatActivity() {    override fun onCreate(savedInstan
 
             var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
 
-            val postData = params.map {(k, v) -> "${(k)}=${v}"}
-                .joinToString("&")
+            val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
 
             var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
 

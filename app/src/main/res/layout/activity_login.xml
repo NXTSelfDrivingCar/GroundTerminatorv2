@@ -79,7 +79,7 @@
         android:layout_gravity="center"
         android:layout_marginBottom="150dp"
         android:fontFamily="sans-serif-condensed-light"
-        android:onClick="registerButton"
+        android:onClick="RegisterButton"
         android:text="Register"
         android:textColor="@color/white"
         android:backgroundTint="@color/prussian_blue"

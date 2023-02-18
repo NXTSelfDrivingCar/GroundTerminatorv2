@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
+import com.example.groundterminatorv2.httpHandler.HTTPResponse
 import com.example.groundterminatorv2.shared.CurrentUser
 
 class EmailChangeActivity : AppCompatActivity() {
@@ -17,18 +18,31 @@ class EmailChangeActivity : AppCompatActivity() {
     }
 
     fun confirmButton(v: View) {
-        val newEmail: EditText = findViewById<EditText>(R.id.etNewEmail)
-        val postData: String= "type=email&value=" + newEmail.text + "&token=" + CurrentUser.token
-        var response = HTTPHandler.handlePostMethod("/user/update/mobile", postData)
-        var status = response.content.get("status")
-        Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+        val newEmailValue = findViewById<EditText>(R.id.etNewEmail)
+        val passwordValue = findViewById<EditText>(R.id.etPassword)
 
-        if(status == "OK")
-        {
-            Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
+        if (passwordValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()){
+
+            val postData = "token=" + CurrentUser.token + "&email=" + newEmailValue.text + "&currentPassword=" + passwordValue.text
+
+            var response: HTTPResponse = HTTPHandler.handlePostMethod("/user/update/mobile", postData)
+
+            var status = response.content.get("status").toString()
+
+            Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+
+            if(status == "updateComplete") {
+                val intent = Intent(this, CameraActivity::class.java)
+                startActivity(intent)
+                Toast.makeText(this, "Password set.", Toast.LENGTH_SHORT)
+                finish()
+            }
+            else if (status == "userNotFound") {
+                Toast.makeText(this, "Password not in database.", Toast.LENGTH_SHORT).show()
+            }
+            else if(status == "updatefailed") {
+                Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

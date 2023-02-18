@@ -8,7 +8,7 @@
     android:background="@color/black"
     tools:context=".CameraActivity">
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/camera_capture_button"
         android:layout_width="120dp"
         android:layout_height="120dp"
@@ -17,9 +17,11 @@
         android:elevation="2dp"
         android:scaleType="fitCenter"
         android:text="Capture Photo"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-condensed-light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"/>
 
     <ImageView
         android:id="@+id/iv_capture"
@@ -58,6 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="10dp"
+            android:backgroundTint="@color/prussian_blue"
+            android:fontFamily="sans-serif-condensed-light"
             android:layout_weight="1"
             android:onClick="changePassClicked"
             android:text="Pass"
@@ -70,6 +74,8 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
             android:layout_weight="1"
+            android:backgroundTint="@color/prussian_blue"
+            android:fontFamily="sans-serif-condensed-light"
             android:onClick="changeUsernameClicked"
             android:text="Uname" />
 
@@ -80,6 +86,8 @@
             android:layout_weight="1"
             android:onClick="changeEmailClicked"
             android:text="Email"
+            android:backgroundTint="@color/prussian_blue"
+            android:fontFamily="sans-serif-condensed-light"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.54"
@@ -88,11 +96,13 @@
             app:layout_constraintVertical_bias="0.023" />
 
         <Button
+            android:id="@+id/delAccBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:onClick="deleteAccontClicked"
+            android:backgroundTint="@color/prussian_blue"
+            android:fontFamily="sans-serif-condensed-light"
             android:text="Del acc"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

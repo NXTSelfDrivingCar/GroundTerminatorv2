@@ -5,10 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/appbg"
-    tools:context=".PasswordChangeActivity">
-
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context=".DeleteAccountActivity">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -27,51 +29,37 @@
             android:orientation="vertical">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Change your password"
-                android:layout_gravity="center"
-                android:fontFamily="sans-serif-condensed"
-                android:textSize="20sp"
-                android:textColor="@color/prussian_blue"/>
-
-            <EditText
-                android:id="@+id/etCurrentPass"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fontFamily="sans-serif-condensed-light"
-                android:hint="Enter current password"
-                android:inputType="textPassword" />
-
-            <EditText
-                android:id="@+id/etNewPass"
-                android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Enter new password"
-                android:inputType="textPassword"/>
+                android:layout_marginTop="20dp"
+                android:fontFamily="sans-serif-condensed"
+                android:gravity="center"
+                android:text="Confirm your password"
+                android:textColor="@color/prussian_blue"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
             <EditText
                 android:id="@+id/etPassword"
-                android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Confirm new password"
-                android:inputType="textPassword"/>
+                android:layout_marginTop="20dp"
+                android:ems="10"
+                android:fontFamily="sans-serif-condensed-light"
+                android:hint="Password"
+                android:inputType="textPassword" />
 
             <Button
-                android:fontFamily="sans-serif-condensed"
-                android:layout_marginTop="20dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="CONFIRM"
+                android:layout_marginTop="20dp"
                 android:backgroundTint="@color/prussian_blue"
-                android:onClick="confirmButton"/>
+                android:fontFamily="sans-serif-condensed-light"
+                android:onClick="btnDelClicked"
+                android:text="Delete my Account" />
 
         </LinearLayout>
-
-
 
     </androidx.cardview.widget.CardView>
 
