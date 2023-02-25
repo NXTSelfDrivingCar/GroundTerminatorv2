@@ -21,10 +21,10 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".DeleteAccountActivity"
+            android:name=".SocketMessageActivity"
             android:exported="false" />
         <activity
-            android:name=".PopupActivity"
+            android:name=".DeleteAccountActivity"
             android:exported="false" />
         <activity
             android:name=".EmailChangeActivity"

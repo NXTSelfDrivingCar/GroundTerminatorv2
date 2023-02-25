@@ -26,6 +26,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/tvRegister"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
@@ -77,14 +78,15 @@
                 android:inputType="textPassword" />
 
             <Button
+                android:id="@+id/btnRegister"
                 android:layout_width="wrap_content"
-                android:fontFamily="sans-serif-condensed-light"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:backgroundTint="@color/prussian_blue"
+                android:fontFamily="sans-serif-condensed-light"
                 android:onClick="btnRegClicked"
-                android:text="Register"/>
+                android:text="Register" />
 
         </LinearLayout>
 

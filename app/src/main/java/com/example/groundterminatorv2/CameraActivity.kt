@@ -22,15 +22,13 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
 import com.example.groundterminatorv2.shared.CurrentUser
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
+import io.socket.client.IO
+import io.socket.client.Socket
+import org.json.JSONObject
 
 class CameraActivity : AppCompatActivity() {
 
@@ -42,7 +40,7 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera)
 
-        delAccBtn.setOnClickListener {
+        btnDeleteAccount.setOnClickListener {
             val intent = Intent(this, DeleteAccountActivity::class.java)
             intent.putExtra("popuptitle", "Error")
             intent.putExtra("popuptext", "Sorry, that email address is already used!")
@@ -51,8 +49,62 @@ class CameraActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+//socket message button
+        findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
+            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
+            startActivity(socMsgIntent)
+            finish()
+        }
+
         // hide the action bar
         supportActionBar?.hide()
+
+        val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
+//Connect button
+        findViewById<Button>(R.id.btnWSConnect).setOnClickListener{
+            Log.d("WSConnection", "Installing http client")
+            mSoc.connect();
+            Log.d("WSConnection", "Connected");
+            mSoc.send("Hello wrld.")
+
+            mSoc.on("message") { message ->
+//            mSoc.send("Server is returning the message back: " + message);
+                Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
+            }
+
+            var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
+            var jObject = JSONObject(params)
+            mSoc.emit("joinRoom", jObject)
+            Log.d("mini", jObject.toString())
+        }
+//password change button
+        findViewById<Button>(R.id.btnPasswordChange).setOnClickListener{
+            val intentPassChange = Intent(this, PasswordChangeActivity::class.java)
+            startActivity(intentPassChange)
+            finish()
+        }
+
+// Username change button
+        findViewById<Button>(R.id.btnUsernameChange).setOnClickListener{
+            val intentUsernameChange = Intent(this, UsernameChangeActivity::class.java)
+            startActivity(intentUsernameChange)
+            finish()
+        }
+
+//Email change
+        findViewById<Button>(R.id.btnEmailChange).setOnClickListener{
+            val intentEmailChange = Intent(this, EmailChangeActivity::class.java)
+            startActivity(intentEmailChange)
+            finish()
+        }
+
+        val btnDelAccValue = findViewById<Button>(R.id.btnDeleteAccount)
+//delete account activity
+        btnDelAccValue.setOnClickListener{
+            val intentDeleteAccountActivity = Intent(this, DeleteAccountActivity::class.java)
+            startActivity(intentDeleteAccountActivity)
+            finish()
+        }
 
         // Check camera permissions if all permission granted
         // start camera else ask for the permission
@@ -64,7 +116,7 @@ class CameraActivity : AppCompatActivity() {
 
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
-        findViewById<Button>(R.id.camera_capture_button).setOnClickListener {
+        findViewById<Button>(R.id.btnCapture).setOnClickListener {
             takePhoto()
         }
         outputDirectory = getOutputDirectory()
@@ -173,7 +225,8 @@ class CameraActivity : AppCompatActivity() {
                 // If permissions are not granted,
                 // present a toast to notify the user that
                 // the permissions were not granted.
-                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT)
+                    .show()
                 finish()
             }
         }
@@ -189,39 +242,5 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
-    }
-
-    fun changePassClicked(v:View) {
-        val intentPassChange = Intent(this, PasswordChangeActivity::class.java)
-        startActivity(intentPassChange)
-        finish()
-    }
-
-    fun changeUsernameClicked(v:View){
-        val intentUsernameChange = Intent(this, UsernameChangeActivity::class.java)
-        startActivity(intentUsernameChange)
-        finish()
-    }
-
-    fun changeEmailClicked(v:View){
-        val intentEmailChange = Intent(this, EmailChangeActivity::class.java)
-        startActivity(intentEmailChange)
-        finish()
-    }
-
-    fun deleteAccontClicked(v:View)
-    {
-        val postData: String= "tkn=" + CurrentUser.token
-        var response = HTTPHandler.handlePostMethod("/user/remove/mobile", postData)
-        var status = response.content.get("status")
-        Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-
-        if(status == "OK")
-        {
-            Toast.makeText(this, "OK", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
     }
 }
