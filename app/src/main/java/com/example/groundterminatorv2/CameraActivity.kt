@@ -3,6 +3,8 @@ package com.example.groundterminatorv2
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.util.Log
 import android.widget.Button
@@ -29,6 +31,7 @@ import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 
 class CameraActivity : AppCompatActivity() {
 
@@ -60,23 +63,7 @@ class CameraActivity : AppCompatActivity() {
         supportActionBar?.hide()
 
         val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
-//Connect button
-        findViewById<Button>(R.id.btnWSConnect).setOnClickListener{
-            Log.d("WSConnection", "Installing http client")
-            mSoc.connect();
-            Log.d("WSConnection", "Connected");
-            mSoc.send("Hello wrld.")
 
-            mSoc.on("message") { message ->
-//            mSoc.send("Server is returning the message back: " + message);
-                Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
-            }
-
-            var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
-            var jObject = JSONObject(params)
-            mSoc.emit("joinRoom", jObject)
-            Log.d("mini", jObject.toString())
-        }
 //password change button
         findViewById<Button>(R.id.btnPasswordChange).setOnClickListener{
             val intentPassChange = Intent(this, PasswordChangeActivity::class.java)
@@ -123,16 +110,17 @@ class CameraActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
+
+    lateinit var photoFile : File
     private fun takePhoto() {
         // Get a stable reference of the
         // modifiable image capture use case
         val imageCapture = imageCapture ?: return
 
         // Create time-stamped output file to hold the image
-        val photoFile = File(
+        photoFile = File(
             outputDirectory,
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg"
-        )
+            SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
 
         // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
@@ -150,7 +138,8 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
-
+                    Log.d("uriM", savedUri.toString())
+                    Log.d("photoM", photoFile.readBytes().size.toString())
                     // set the saved uri to the image view
                     findViewById<ImageView>(R.id.iv_capture).visibility = View.VISIBLE
                     findViewById<ImageView>(R.id.iv_capture).setImageURI(savedUri)
@@ -161,6 +150,27 @@ class CameraActivity : AppCompatActivity() {
                 }
             })
     }
+
+    val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
+
+    fun tvojaMama(v: View){
+        Log.d("WSConnection", "Installing http client")
+        mSoc.connect();
+        Log.d("WSConnection", "Connected");
+        mSoc.send("Hello wrld.")
+
+        mSoc.on("message") { message ->
+//            mSoc.send("Server is returning the message back: " + message);
+            Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
+        }
+
+        var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
+        var jObject = JSONObject(params)
+        mSoc.emit("joinRoom", jObject)
+        mSoc.send(photoFile.readBytes().toString())
+        Log.d("mini", jObject.toString())
+    }
+
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
@@ -242,5 +252,10 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+    }
+
+    fun SendArray()
+    {
+
     }
 }

@@ -109,7 +109,6 @@
             android:fontFamily="sans-serif-condensed-light"
             android:textColor="@color/white"
             android:text="Del acc"
-            android:onClick="deleteAccontClicked"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.54"
@@ -128,6 +127,7 @@
         android:fontFamily="sans-serif-condensed-light"
         android:textColor="@color/white"
         android:text="WSConn"
+        android:onClick="tvojaMama"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnCapture"
         app:layout_constraintStart_toStartOf="parent" />
@@ -140,7 +140,6 @@
         android:backgroundTint="@color/black"
         android:fontFamily="sans-serif-condensed-light"
         android:textColor="@color/white"
-        android:onClick="onConnectionClick"
         android:text="mSocMSG"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
