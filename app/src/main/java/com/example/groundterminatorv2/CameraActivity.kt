@@ -4,15 +4,12 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
@@ -24,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.camera.core.*
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
@@ -32,6 +30,7 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 
 class CameraActivity : AppCompatActivity() {
 
@@ -129,26 +128,54 @@ class CameraActivity : AppCompatActivity() {
         // which is triggered after photo has
         // been taken
         imageCapture.takePicture(
-            outputOptions,
             ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exc: ImageCaptureException) {
-                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
+            object : ImageCapture.OnImageCapturedCallback(){
+                override fun onCaptureSuccess(image: ImageProxy) {
+                    Log.d("staGod", image.toString())
+                    val bitMap = imageProxyToBitmap(image)
+                    Log.d("staGod", bitMap.toString())
+                    mSoc.emit("stream", bitMap.toString())
+                    super.onCaptureSuccess(image)
                 }
 
-                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
-                    Log.d("uriM", savedUri.toString())
-                    Log.d("photoM", photoFile.readBytes().size.toString())
-                    // set the saved uri to the image view
-                    findViewById<ImageView>(R.id.iv_capture).visibility = View.VISIBLE
-                    findViewById<ImageView>(R.id.iv_capture).setImageURI(savedUri)
-
-                    val msg = "Photo capture succeeded: $savedUri"
-                    Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
-                    Log.d(TAG, msg)
+                override fun onError(exception: ImageCaptureException) {
+                    super.onError(exception)
                 }
-            })
+            }
+
+        )
+
+//        imageCapture.takePicture(
+//            outputOptions,
+//            ContextCompat.getMainExecutor(this),
+//            object : ImageCapture.OnImageSavedCallback {
+//                override fun onError(exc: ImageCaptureException) {
+//                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
+//                }
+//
+//                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+//                    val savedUri = Uri.fromFile(photoFile)
+//                    Log.d("uriM", savedUri.toString())
+//                    Log.d("photoM", photoFile.readBytes().size.toString())
+//                    // set the saved uri to the image view
+//                    findViewById<ImageView>(R.id.iv_capture).visibility = View.VISIBLE
+//                    findViewById<ImageView>(R.id.iv_capture).setImageURI(savedUri)
+//
+//                    val msg = "Photo capture succeeded: $savedUri"
+//                    Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
+//                    Log.d(TAG, msg)
+//                }
+//            }
+//        )
+
+    }
+
+    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+        val planeProxy = image.planes[0]
+        val buffer: ByteBuffer = planeProxy.buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 
     val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
@@ -167,7 +194,7 @@ class CameraActivity : AppCompatActivity() {
         var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
         var jObject = JSONObject(params)
         mSoc.emit("joinRoom", jObject)
-        mSoc.send(photoFile.readBytes().toString())
+//        mSoc.send(photoFile.readBytes().toString())
         Log.d("mini", jObject.toString())
     }
 
