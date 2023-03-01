@@ -1,11 +1,13 @@
 package com.example.groundterminatorv2
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.media.Image
 import android.net.Uri
 import android.util.Log
 import android.widget.Button
@@ -60,8 +62,6 @@ class CameraActivity : AppCompatActivity() {
 
         // hide the action bar
         supportActionBar?.hide()
-
-        val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
 
 //password change button
         findViewById<Button>(R.id.btnPasswordChange).setOnClickListener{
@@ -130,12 +130,16 @@ class CameraActivity : AppCompatActivity() {
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback(){
-                override fun onCaptureSuccess(image: ImageProxy) {
-                    Log.d("staGod", image.toString())
-                    val bitMap = imageProxyToBitmap(image)
-                    Log.d("staGod", bitMap.toString())
-                    mSoc.emit("stream", bitMap.toString())
-                    super.onCaptureSuccess(image)
+                @SuppressLint("UnsafeOptInUsageError")
+                override fun onCaptureSuccess(imageProxy: ImageProxy) {
+
+                    val base64String = imageProxyToBase64(imageProxy)
+
+                    Log.d("base64", base64String)
+
+                    mSoc.emit("stream", base64String)
+
+                    super.onCaptureSuccess(imageProxy)
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -145,40 +149,27 @@ class CameraActivity : AppCompatActivity() {
 
         )
 
-//        imageCapture.takePicture(
-//            outputOptions,
-//            ContextCompat.getMainExecutor(this),
-//            object : ImageCapture.OnImageSavedCallback {
-//                override fun onError(exc: ImageCaptureException) {
-//                    Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
-//                }
-//
-//                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-//                    val savedUri = Uri.fromFile(photoFile)
-//                    Log.d("uriM", savedUri.toString())
-//                    Log.d("photoM", photoFile.readBytes().size.toString())
-//                    // set the saved uri to the image view
-//                    findViewById<ImageView>(R.id.iv_capture).visibility = View.VISIBLE
-//                    findViewById<ImageView>(R.id.iv_capture).setImageURI(savedUri)
-//
-//                    val msg = "Photo capture succeeded: $savedUri"
-//                    Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
-//                    Log.d(TAG, msg)
-//                }
-//            }
-//        )
-
     }
 
-    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+    @SuppressLint("NewApi")
+    private fun imageProxyToBase64(image: ImageProxy): String {
         val planeProxy = image.planes[0]
         val buffer: ByteBuffer = planeProxy.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+        val bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        val stream = ByteArrayOutputStream()
+
+        bm.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+
+        val byteFormat = stream.toByteArray()
+        val imgString = Base64.getEncoder().encodeToString(byteFormat)
+
+        return imgString
     }
 
-    val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
+    val mSoc: Socket = IO.socket("http://192.168.0.23:5001");
 
     fun tvojaMama(v: View){
         Log.d("WSConnection", "Installing http client")
@@ -281,8 +272,4 @@ class CameraActivity : AppCompatActivity() {
         cameraExecutor.shutdown()
     }
 
-    fun SendArray()
-    {
-
-    }
 }
