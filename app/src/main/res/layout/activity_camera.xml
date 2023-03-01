@@ -77,7 +77,6 @@
             android:layout_weight="1"
             android:backgroundTint="#2A2A2A"
             android:fontFamily="sans-serif-condensed-light"
-            android:onClick="changeUsernameClicked"
             android:text="Uname"
             android:textColor="@color/white" />
 
@@ -89,7 +88,6 @@
             android:layout_weight="1"
             android:backgroundTint="#2A2A2A"
             android:fontFamily="sans-serif-condensed-light"
-            android:onClick="changeEmailClicked"
             android:text="Email"
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
