@@ -4,29 +4,35 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Bundle
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.media.Image
+import android.net.Uri
 import android.util.Log
-import android.view.View
 import android.widget.Button
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.*
+import android.widget.ImageView
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.example.groundterminatorv2.shared.CurrentUser
-import io.socket.client.IO
-import io.socket.client.Socket
 import kotlinx.android.synthetic.main.activity_camera.*
-import org.json.JSONObject
 import java.io.File
-import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.camera.core.*
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
+import com.example.groundterminatorv2.shared.CurrentUser
+import io.socket.client.IO
+import io.socket.client.Socket
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.nio.ByteBuffer
 
 class CameraActivity : AppCompatActivity() {
 
@@ -56,8 +62,6 @@ class CameraActivity : AppCompatActivity() {
 
         // hide the action bar
         supportActionBar?.hide()
-
-        val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
 
 //password change button
         findViewById<Button>(R.id.btnPasswordChange).setOnClickListener{
@@ -126,16 +130,16 @@ class CameraActivity : AppCompatActivity() {
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback(){
-                @RequiresApi(Build.VERSION_CODES.O)
-                override fun onCaptureSuccess(image: ImageProxy) {
-                    Log.d("staGod", image.toString())
-                    val bitMap = imageProxyToBitmap(image)
-                    Log.d("staGod", bitMap.toString())
+                @SuppressLint("UnsafeOptInUsageError")
+                override fun onCaptureSuccess(imageProxy: ImageProxy) {
 
-                    val encodedImage: String = Base64.encodeToString(byteArrayImage, Base64.getEncoder())
+                    val base64String = imageProxyToBase64(imageProxy)
 
-                    mSoc.emit("stream", bitMap/*bitMap.toString()*/)
-                    super.onCaptureSuccess(image)
+                    Log.d("base64", base64String)
+
+                    mSoc.emit("stream", base64String)
+
+                    super.onCaptureSuccess(imageProxy)
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -144,19 +148,28 @@ class CameraActivity : AppCompatActivity() {
             }
 
         )
+
     }
 
-
     @SuppressLint("NewApi")
-    private fun imageProxyToBitmap(image: ImageProxy): ByteBuffer {
+    private fun imageProxyToBase64(image: ImageProxy): String {
         val planeProxy = image.planes[0]
         val buffer: ByteBuffer = planeProxy.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
-        return buffer//Base64.getMimeEncoder().encodeToString(bytes)
-        //return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+
+        val bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        val stream = ByteArrayOutputStream()
+
+        bm.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+
+        val byteFormat = stream.toByteArray()
+        val imgString = Base64.getEncoder().encodeToString(byteFormat)
+
+        return imgString
     }
-    val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
+
+    val mSoc: Socket = IO.socket("http://192.168.0.23:5001");
 
     fun tvojaMama(v: View){
         Log.d("WSConnection", "Installing http client")
@@ -259,8 +272,4 @@ class CameraActivity : AppCompatActivity() {
         cameraExecutor.shutdown()
     }
 
-    fun SendArray()
-    {
-
-    }
 }

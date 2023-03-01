@@ -9,7 +9,7 @@ import java.io.DataOutputStream
 import java.net.URL
 import java.net.URLConnection
 
-val Address: String = "http://192.168.1.23:5000"
+val Address: String = "http://192.168.0.23:5000"
 
 class HTTPResponse {
     lateinit var conn: URLConnection
