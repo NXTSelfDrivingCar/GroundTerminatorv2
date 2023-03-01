@@ -6,33 +6,28 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.media.Image
-import android.net.Uri
+import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
-import android.widget.ImageView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.example.groundterminatorv2.shared.CurrentUser
+import io.socket.client.IO
+import io.socket.client.Socket
 import kotlinx.android.synthetic.main.activity_camera.*
+import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.view.View
-import android.widget.Toast
-import androidx.camera.core.*
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.example.groundterminatorv2.httpHandler.HTTPHandler
-import com.example.groundterminatorv2.shared.CurrentUser
-import io.socket.client.IO
-import io.socket.client.Socket
-import org.json.JSONObject
-import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
 
 class CameraActivity : AppCompatActivity() {
 
@@ -55,9 +50,15 @@ class CameraActivity : AppCompatActivity() {
 
 //socket message button
         findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
-            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
-            startActivity(socMsgIntent)
-            finish()
+            val nmFPS = Math.round((1000 / 15).toDouble())
+            Timer().scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    takePhoto()
+                }
+            }, 0, nmFPS)
+//            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
+//            startActivity(socMsgIntent)
+//            finish()
         }
 
         // hide the action bar
@@ -135,8 +136,6 @@ class CameraActivity : AppCompatActivity() {
 
                     val base64String = imageProxyToBase64(imageProxy)
 
-                    Log.d("base64", base64String)
-
                     mSoc.emit("stream", base64String)
 
                     super.onCaptureSuccess(imageProxy)
@@ -169,7 +168,7 @@ class CameraActivity : AppCompatActivity() {
         return imgString
     }
 
-    val mSoc: Socket = IO.socket("http://192.168.0.23:5001");
+    val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
 
     fun tvojaMama(v: View){
         Log.d("WSConnection", "Installing http client")
