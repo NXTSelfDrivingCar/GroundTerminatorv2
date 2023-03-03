@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.util.Size
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.groundterminatorv2.shared.CurrentUser
@@ -23,12 +25,10 @@ import io.socket.client.Socket
 import kotlinx.android.synthetic.main.activity_camera.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -54,12 +54,16 @@ class CameraActivity : AppCompatActivity() {
 
 //socket message button
         findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
-            val nmFPS = Math.round((1000 / 30).toDouble())
+            val nmFPS = Math.round((1000 / 15).toDouble())
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
-                    GlobalScope.launch { takePhoto() }
+                    GlobalScope.launch { compressSend() }
                 }
             }, 0, nmFPS)
+
+            //while (true) {
+                //takePhoto()
+            //}
 //            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
 //            startActivity(socMsgIntent)
 //            finish()
@@ -114,9 +118,18 @@ class CameraActivity : AppCompatActivity() {
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
+    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+        val planeProxy = image.planes[0]
+        val buffer: ByteBuffer = planeProxy.buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+
 
     lateinit var photoFile : File
     var counter = 0
+    @SuppressLint("SuspiciousIndentation")
     fun takePhoto() {
         val imageCapture = imageCapture ?: return
             // Set up image capture listener,
@@ -124,16 +137,16 @@ class CameraActivity : AppCompatActivity() {
             // been taken
             imageCapture.takePicture(
                 ContextCompat.getMainExecutor(this),
-                object : ImageCapture.OnImageCapturedCallback(){
+                object : ImageCapture.OnImageCapturedCallback() {
                     @SuppressLint("UnsafeOptInUsageError")
                     override fun onCaptureSuccess(imageProxy: ImageProxy) {
                         counter++
-                        GlobalScope.launch{
-                            val image = imageProxy.image
-                            compressSend(imageProxy)
-                            Log.d("counter", counter.toString())
-                            image!!.close()
-                        }
+                        val image = imageProxy.image
+                        //compressSend(imageProxy)
+                        Log.d("counter", counter.toString())
+                        image!!.close()
+                        super.onCaptureSuccess(imageProxy)
+                        takePhoto()
                     }
                     override fun onError(exception: ImageCaptureException) {
                         super.onError(exception)
@@ -143,14 +156,21 @@ class CameraActivity : AppCompatActivity() {
             )
     }
 
-    suspend fun compressSend(image: ImageProxy){
-        val base64String = imageProxyToBase64(image)
+    fun compressSend(){
+        val base64String = imageProxyToBase64()
         mSoc.emit("stream", base64String)
     }
 
     @SuppressLint("NewApi")
-    private fun imageProxyToBase64(image: ImageProxy): String {
-        val planeProxy = image.planes[0]
+    private fun imageProxyToBase64(): String {
+        val source = findViewById<PreviewView>(R.id.viewFinder)
+
+        val stream = ByteArrayOutputStream()
+        source.bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+        val bytes = stream.toByteArray()
+
+
+        /*val planeProxy = image.planes[0]
         val buffer: ByteBuffer = planeProxy.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
@@ -158,15 +178,15 @@ class CameraActivity : AppCompatActivity() {
         val bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         val stream = ByteArrayOutputStream()
 
-        bm.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+        bm.compress(Bitmap.CompressFormat.WEBP_LOSSY, 20, stream)
 
-        val byteFormat = stream.toByteArray()
-        val imgString = Base64.getEncoder().encodeToString(byteFormat)
+        val byteFormat = stream.toByteArray()*/
+        val imgString = Base64.getEncoder().encodeToString(bytes)
 
         return imgString
     }
 
-    val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
+    val mSoc: Socket = IO.socket("http://192.168.0.11:5001");
 
     fun tvojaMama(v: View){
         Log.d("WSConnection", "Installing http client")
@@ -187,6 +207,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
 
+    @SuppressLint("RestrictedApi")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -197,19 +218,22 @@ class CameraActivity : AppCompatActivity() {
 
             // Preview
             val preview = Preview.Builder()
+                .setTargetResolution(Size(640, 480))
                 .build()
                 .also {
                     it.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 }
 
             imageCapture = ImageCapture.Builder()
+                .setDefaultResolution(Size(320, 240))
+                .setMaxResolution(Size(320, 240))
                 .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
-
-
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+
 
             try {
                 // Unbind use cases before rebinding
