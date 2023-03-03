@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
+import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,6 +21,9 @@ import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
 import kotlinx.android.synthetic.main.activity_camera.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -50,10 +54,10 @@ class CameraActivity : AppCompatActivity() {
 
 //socket message button
         findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
-            val nmFPS = Math.round((1000 / 15).toDouble())
+            val nmFPS = Math.round((1000 / 30).toDouble())
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
-                    takePhoto()
+                    GlobalScope.launch { takePhoto() }
                 }
             }, 0, nmFPS)
 //            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
@@ -112,42 +116,36 @@ class CameraActivity : AppCompatActivity() {
 
 
     lateinit var photoFile : File
-    private fun takePhoto() {
-        // Get a stable reference of the
-        // modifiable image capture use case
+    var counter = 0
+    fun takePhoto() {
         val imageCapture = imageCapture ?: return
-
-        // Create time-stamped output file to hold the image
-        photoFile = File(
-            outputDirectory,
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(System.currentTimeMillis()) + ".jpg")
-
-        // Create output options object which contains file + metadata
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-
-        // Set up image capture listener,
-        // which is triggered after photo has
-        // been taken
-        imageCapture.takePicture(
-            ContextCompat.getMainExecutor(this),
-            object : ImageCapture.OnImageCapturedCallback(){
-                @SuppressLint("UnsafeOptInUsageError")
-                override fun onCaptureSuccess(imageProxy: ImageProxy) {
-
-                    val base64String = imageProxyToBase64(imageProxy)
-
-                    mSoc.emit("stream", base64String)
-
-                    super.onCaptureSuccess(imageProxy)
+            // Set up image capture listener,
+            // which is triggered after photo has
+            // been taken
+            imageCapture.takePicture(
+                ContextCompat.getMainExecutor(this),
+                object : ImageCapture.OnImageCapturedCallback(){
+                    @SuppressLint("UnsafeOptInUsageError")
+                    override fun onCaptureSuccess(imageProxy: ImageProxy) {
+                        counter++
+                        GlobalScope.launch{
+                            val image = imageProxy.image
+                            compressSend(imageProxy)
+                            Log.d("counter", counter.toString())
+                            image!!.close()
+                        }
+                    }
+                    override fun onError(exception: ImageCaptureException) {
+                        super.onError(exception)
+                    }
                 }
 
-                override fun onError(exception: ImageCaptureException) {
-                    super.onError(exception)
-                }
-            }
+            )
+    }
 
-        )
-
+    suspend fun compressSend(image: ImageProxy){
+        val base64String = imageProxyToBase64(image)
+        mSoc.emit("stream", base64String)
     }
 
     @SuppressLint("NewApi")
@@ -204,7 +202,11 @@ class CameraActivity : AppCompatActivity() {
                     it.setSurfaceProvider(viewFinder.createSurfaceProvider())
                 }
 
-            imageCapture = ImageCapture.Builder().build()
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
+                .build()
+
+
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
