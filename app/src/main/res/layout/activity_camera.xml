@@ -16,7 +16,7 @@
         android:elevation="2dp"
         android:fontFamily="sans-serif-condensed-light"
         android:scaleType="fitCenter"
-        android:text="Capture Photo"
+        android:text="Start stream"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -125,7 +125,7 @@
         android:fontFamily="sans-serif-condensed-light"
         android:textColor="@color/white"
         android:text="WSConn"
-        android:onClick="tvojaMama"
+        android:onClick="connectWS"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnCapture"
         app:layout_constraintStart_toStartOf="parent" />

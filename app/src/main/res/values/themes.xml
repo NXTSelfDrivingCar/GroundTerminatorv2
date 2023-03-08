@@ -15,6 +15,10 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
+
+        <item name="colorControlNormal">#000000</item>
+        <item name="colorControlActivated">#040404</item>
+        <item name="colorControlHighlight">#000000</item>
     </style>
 
     <style name="Theme.GroundTerminatorV2.NoActionBar">
