@@ -52,23 +52,6 @@ class CameraActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-//socket message button
-        findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
-            val nmFPS = Math.round((1000 / 15).toDouble())
-            Timer().scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    GlobalScope.launch { compressSend() }
-                }
-            }, 0, nmFPS)
-
-            //while (true) {
-                //takePhoto()
-            //}
-//            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
-//            startActivity(socMsgIntent)
-//            finish()
-        }
-
         // hide the action bar
         supportActionBar?.hide()
 
@@ -112,9 +95,13 @@ class CameraActivity : AppCompatActivity() {
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
         findViewById<Button>(R.id.btnCapture).setOnClickListener {
-            takePhoto()
+            val nmFPS = Math.round((1000 / 15).toDouble())
+            Timer().scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    GlobalScope.launch { compressSend() }
+                }
+            }, 0, nmFPS)
         }
-        outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
@@ -124,36 +111,6 @@ class CameraActivity : AppCompatActivity() {
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    }
-
-
-    lateinit var photoFile : File
-    var counter = 0
-    @SuppressLint("SuspiciousIndentation")
-    fun takePhoto() {
-        val imageCapture = imageCapture ?: return
-            // Set up image capture listener,
-            // which is triggered after photo has
-            // been taken
-            imageCapture.takePicture(
-                ContextCompat.getMainExecutor(this),
-                object : ImageCapture.OnImageCapturedCallback() {
-                    @SuppressLint("UnsafeOptInUsageError")
-                    override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                        counter++
-                        val image = imageProxy.image
-                        //compressSend(imageProxy)
-                        Log.d("counter", counter.toString())
-                        image!!.close()
-                        super.onCaptureSuccess(imageProxy)
-                        takePhoto()
-                    }
-                    override fun onError(exception: ImageCaptureException) {
-                        super.onError(exception)
-                    }
-                }
-
-            )
     }
 
     fun compressSend(){
@@ -186,9 +143,9 @@ class CameraActivity : AppCompatActivity() {
         return imgString
     }
 
-    val mSoc: Socket = IO.socket("http://192.168.0.11:5001");
+    private val mSoc: Socket = IO.socket("http://192.168.216.58:5001");
 
-    fun tvojaMama(v: View){
+    fun connectWS(v: View){
         Log.d("WSConnection", "Installing http client")
         mSoc.connect();
         Log.d("WSConnection", "Connected");
@@ -203,6 +160,10 @@ class CameraActivity : AppCompatActivity() {
         var jObject = JSONObject(params)
         mSoc.emit("joinRoom", jObject)
 //        mSoc.send(photoFile.readBytes().toString())
+
+        mSoc.on("nxtControl"){
+            Log.d("nxtControl", it[0].toString())
+        }
         Log.d("mini", jObject.toString())
     }
 
@@ -253,15 +214,6 @@ class CameraActivity : AppCompatActivity() {
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    // creates a folder inside internal storage
-    private fun getOutputDirectory(): File {
-        val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
-        }
-        return if (mediaDir != null && mediaDir.exists())
-            mediaDir else filesDir
     }
 
     // checks the camera permission
