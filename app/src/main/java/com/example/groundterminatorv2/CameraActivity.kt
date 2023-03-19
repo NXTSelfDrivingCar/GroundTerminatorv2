@@ -17,6 +17,7 @@ import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
 import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -54,15 +55,6 @@ class CameraActivity : AppCompatActivity() {
 
 //socket message button
         findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
-            val nmFPS = Math.round((1000 / 30).toDouble())
-            Timer().scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    GlobalScope.launch { CameraHandler.takePhoto() }
-                }
-            }, 0, nmFPS)
-//            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
-//            startActivity(socMsgIntent)
-//            finish()
         }
 
         // hide the action bar
@@ -138,25 +130,8 @@ class CameraActivity : AppCompatActivity() {
         return imgString
     }
 
-    val mSoc: Socket = IO.socket("http://192.168.1.23:5001");
+    val mSoc: Socket = IO.socket(HTTPHandler.Address+":5001");
 
-    fun tvojaMama(v: View){
-        Log.d("WSConnection", "Installing http client")
-        mSoc.connect();
-        Log.d("WSConnection", "Connected");
-        mSoc.send("Hello wrld.")
-
-        mSoc.on("message") { message ->
-//            mSoc.send("Server is returning the message back: " + message);
-            Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
-        }
-
-        var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
-        var jObject = JSONObject(params)
-        mSoc.emit("joinRoom", jObject)
-//        mSoc.send(photoFile.readBytes().toString())
-        Log.d("mini", jObject.toString())
-    }
 
 
     private fun startCamera() {

@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
+<<<<<<< Updated upstream
 //import androidx.navigation.findNavController
 //import androidx.navigation.ui.AppBarConfiguration
 //import androidx.navigation.ui.setupActionBarWithNavController
@@ -18,6 +19,9 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.DataOutputStream
 import java.net.URL
+=======
+import com.example.groundterminatorv2.httpHandler.HTTPResponse
+>>>>>>> Stashed changes
 import com.example.groundterminatorv2.shared.CurrentUser
 import com.example.groundterminatorv2.httpHandler.HTTPResponse
 import io.ktor.client.*
@@ -45,8 +49,8 @@ class LoginActivity : AppCompatActivity() {
 
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
 
-            HTTPHandler.Address = "http://192.168."+etServerAddress.text+":5000"
-            Toast.makeText(this, "${HTTPHandler.Address}", Toast.LENGTH_SHORT).show()
+            HTTPHandler.Address = "http://192.168."+etServerAddress.text
+            Toast.makeText(this, "${HTTPHandler.Address+":5000"}", Toast.LENGTH_SHORT).show()
             var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
 
             val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
