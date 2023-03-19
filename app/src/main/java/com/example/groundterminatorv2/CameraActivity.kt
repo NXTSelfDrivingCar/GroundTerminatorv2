@@ -121,15 +121,6 @@ class CameraActivity : AppCompatActivity() {
         //BT stvari
         val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
         bluetoothResolver.init(this)
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-        if (bluetoothAdapter != null) {
-            if (bluetoothAdapter?.isEnabled == false) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, 1)
-                Log.d("NXTTAG", bluetoothAdapter.isEnabled.toString() + "????")
-            }
-        }
 
         var nxtController: NXTBluetoothController = NXTBluetoothController(bluetoothResolver)
 
@@ -148,7 +139,6 @@ class CameraActivity : AppCompatActivity() {
             return
         }
         nxtController.setSocket("NXT")
-        bluetoothResolver.connectSocket(nxtController.getSocket()!!)
 
         mSoc.on("nxtControl") { message ->
             var command = NXTCommand()
@@ -179,14 +169,6 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
-        val planeProxy = image.planes[0]
-        val buffer: ByteBuffer = planeProxy.buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    }
-
     fun compressSend(){
         val base64String = imageProxyToBase64()
         mSoc.emit("stream", base64String)
@@ -199,19 +181,6 @@ class CameraActivity : AppCompatActivity() {
         val stream = ByteArrayOutputStream()
         source.bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, stream)
         val bytes = stream.toByteArray()
-
-
-        /*val planeProxy = image.planes[0]
-        val buffer: ByteBuffer = planeProxy.buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-
-        val bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-        val stream = ByteArrayOutputStream()
-
-        bm.compress(Bitmap.CompressFormat.WEBP_LOSSY, 20, stream)
-
-        val byteFormat = stream.toByteArray()*/
         val imgString = Base64.getEncoder().encodeToString(bytes)
 
         return imgString
@@ -226,14 +195,12 @@ class CameraActivity : AppCompatActivity() {
         mSoc.send("Hello wrld.")
 
         mSoc.on("message") { message ->
-//            mSoc.send("Server is returning the message back: " + message);
             Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
         }
 
         var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
         var jObject = JSONObject(params)
         mSoc.emit("joinRoom", jObject)
-//        mSoc.send(photoFile.readBytes().toString())
 
         mSoc.on("nxtControl"){
             Log.d("nxtControl", it[0].toString())
