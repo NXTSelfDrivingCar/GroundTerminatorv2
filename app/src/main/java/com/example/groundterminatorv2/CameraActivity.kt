@@ -207,7 +207,6 @@ class CameraActivity : AppCompatActivity() {
                 .build()
 
 
-
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 

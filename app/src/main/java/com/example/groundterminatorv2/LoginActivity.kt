@@ -27,22 +27,16 @@ import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import kotlinx.android.synthetic.main.activity_login.*
 
 
 class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-
-    //    private lateinit var appBarConfiguration: AppBarConfiguration
-//    private lateinit var binding: ActivityLogInPage2Binding
-    super.onCreate(savedInstanceState)
-//        binding = ActivityLogInPage2Binding.inflate(layoutInflater)
+        super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_login)
-//
-//        setSupportActionBar(binding.toolbar)
 
     val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
     StrictMode.setThreadPolicy(policy)
-
 }
 
     fun logInButton(v: View) {
@@ -51,26 +45,28 @@ class LoginActivity : AppCompatActivity() {
 
         if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
 
-//            val client = HttpClient(CIO)
-//
-//            val response: HttpResponse = client.request("http://192.168.104.58:5000/user/login/mobile"){
-//                method = HttpMethod.Post
-//                headers {
-//                    append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
-//                }
-//                url {
-//                    parameters.append("username", usernameValue.text.toString())
-//                    parameters.append("password", passwordValue.text.toString())
-//                }
-//            }
-//
-//            Log.d("NXT", response.body())
-
+            HTTPHandler.Address = "http://192.168."+etServerAddress.text+":5000"
+            Toast.makeText(this, "${HTTPHandler.Address}", Toast.LENGTH_SHORT).show()
             var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
 
             val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
 
-            var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+            var response : HTTPResponse? = null
+
+            //attempts to get a response, if no value leave function
+            try
+            {
+                response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+
+            } catch (E: Exception){
+                return;
+            }
+
+            //if response is null function has no values to work with
+            if(response==null)
+            {
+                return
+            }
 
             // Gets login status { OK | Unauthorized }
             var status = response.content.get("status")
@@ -87,6 +83,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
                 return
             }
+            //trims current tokens
             for(cookie in headerCookie!!){
                 Log.d("NXT Login cookie loop", cookie as String)
                 if(cookie.startsWith("auth=")){
