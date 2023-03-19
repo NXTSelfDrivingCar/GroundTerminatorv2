@@ -57,7 +57,7 @@ class CameraActivity : AppCompatActivity() {
             val nmFPS = Math.round((1000 / 30).toDouble())
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
-                    GlobalScope.launch { takePhoto() }
+                    GlobalScope.launch { CameraHandler.takePhoto() }
                 }
             }, 0, nmFPS)
 //            val socMsgIntent = Intent(this, SocketMessageActivity::class.java)
@@ -108,40 +108,12 @@ class CameraActivity : AppCompatActivity() {
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
         findViewById<Button>(R.id.btnCapture).setOnClickListener {
-            takePhoto()
+            //todo give functionality
         }
         outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
 
-
-    lateinit var photoFile : File
-    var counter = 0
-    fun takePhoto() {
-        val imageCapture = imageCapture ?: return
-            // Set up image capture listener,
-            // which is triggered after photo has
-            // been taken
-            imageCapture.takePicture(
-                ContextCompat.getMainExecutor(this),
-                object : ImageCapture.OnImageCapturedCallback(){
-                    @SuppressLint("UnsafeOptInUsageError")
-                    override fun onCaptureSuccess(imageProxy: ImageProxy) {
-                        counter++
-                        GlobalScope.launch{
-                            val image = imageProxy.image
-                            compressSend(imageProxy)
-                            Log.d("counter", counter.toString())
-                            image!!.close()
-                        }
-                    }
-                    override fun onError(exception: ImageCaptureException) {
-                        super.onError(exception)
-                    }
-                }
-
-            )
-    }
 
     suspend fun compressSend(image: ImageProxy){
         val base64String = imageProxyToBase64(image)
