@@ -44,7 +44,7 @@ class NXTBluetoothController {
             bluetoothSocket!!.outputStream.write(header, 0, header.size)
             bluetoothSocket!!.outputStream.write(command, 0, command.size)
 
-            val result = bluetoothSocket!!.inputStream.readNBytes(5)
+            //val result = bluetoothSocket!!.inputStream.readNBytes(5)
 
         }
 
