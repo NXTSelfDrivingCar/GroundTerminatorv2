@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.opengl.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +18,12 @@ import android.widget.Toast
 import androidx.activity.addCallback
 
 import android.util.Size
+import android.view.OrientationEventListener
+import android.view.Surface
+import android.view.Surface.ROTATION_270
+import android.view.Surface.ROTATION_90
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -27,6 +33,7 @@ import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.camera.view.PreviewView.ImplementationMode
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -72,8 +79,20 @@ class CameraActivity : AppCompatActivity() {
         setContentView(view)
 
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        btnDeleteAccount.setOnClickListener {
+            val intent = Intent(this, DeleteAccountActivity::class.java)
+            intent.putExtra("popuptitle", "Error")
+            intent.putExtra("popuptext", "Sorry, that email address is already used!")
+            intent.putExtra("popupbtn", "OK")
+            intent.putExtra("darkstatusbar", false)
+            startActivity(intent)
+
+
 //socket message button
         binding.btnSocketMessage.setOnClickListener{
+
         }
 
 
@@ -127,7 +146,7 @@ class CameraActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btnCapture).setOnClickListener {
 
-            val nmFPS = Math.round((1000 / 15).toDouble())
+            val nmFPS = Math.round((1000 / 10).toDouble())
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     GlobalScope.launch { compressSend() }
@@ -139,15 +158,6 @@ class CameraActivity : AppCompatActivity() {
         //BT stvari
         val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
         bluetoothResolver.init(this)
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-        if (bluetoothAdapter != null) {
-            if (bluetoothAdapter?.isEnabled == false) {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, 1)
-                Log.d("NXTTAG", bluetoothAdapter.isEnabled.toString() + "????")
-            }
-        }
 
 
     suspend fun compressSend(image: ImageProxy){
@@ -170,18 +180,23 @@ class CameraActivity : AppCompatActivity() {
             return
         }
         nxtController.setSocket("NXT")
-        bluetoothResolver.connectSocket(nxtController.getSocket()!!)
 
-        mSoc.on("nxtControl") { message ->
+        mSoc.on("NXTControl") { message ->
             var command = NXTCommand()
 
             when(message[0]) {
-                "forward" -> {
+                "up" -> {
                     command.addControl(Motor.BOTH, 100)
                     nxtController.runCommand(command)
+                    Thread.sleep(100)
+                    command.stop()
+                    nxtController.runCommand(command)
                 }
-                "backward" -> {
+                "down" -> {
                     command.addControl(Motor.BOTH, -100)
+                    nxtController.runCommand(command)
+                    Thread.sleep(100)
+                    command.stop()
                     nxtController.runCommand(command)
                 }
                 "left" -> {
@@ -189,24 +204,22 @@ class CameraActivity : AppCompatActivity() {
                     nxtController.runCommand(command)
                     command.addControl(Motor.RIGHT, -100)
                     nxtController.runCommand(command)
+                    Thread.sleep(100)
+                    command.stop()
+                    nxtController.runCommand(command)
                 }
                 "right" -> {
                     command.addControl(Motor.RIGHT, 100)
                     nxtController.runCommand(command)
                     command.addControl(Motor.LEFT, -100)
                     nxtController.runCommand(command)
+                    Thread.sleep(100)
+                    command.stop()
+                    nxtController.runCommand(command)
                 }
             }
 
         }
-    }
-
-    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
-        val planeProxy = image.planes[0]
-        val buffer: ByteBuffer = planeProxy.buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     }
 
     fun compressSend(){
@@ -220,21 +233,13 @@ class CameraActivity : AppCompatActivity() {
         val source = findViewById<PreviewView>(R.id.viewFinder)
 
         val stream = ByteArrayOutputStream()
-        source.bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+
+        var matrix = android.graphics.Matrix()
+        matrix.postRotate(270f)
+        val bp = Bitmap.createBitmap(source.bitmap!!, 0, 0, source.bitmap!!.width, source.bitmap!!.height, matrix, true)
+
+        bp.compress(Bitmap.CompressFormat.JPEG, 20, stream)
         val bytes = stream.toByteArray()
-
-
-        /*val planeProxy = image.planes[0]
-        val buffer: ByteBuffer = planeProxy.buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-
-        val bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-        val stream = ByteArrayOutputStream()
-
-        bm.compress(Bitmap.CompressFormat.WEBP_LOSSY, 20, stream)
-
-        val byteFormat = stream.toByteArray()*/
         val imgString = Base64.getEncoder().encodeToString(bytes)
 
         return imgString
@@ -250,14 +255,12 @@ class CameraActivity : AppCompatActivity() {
         mSoc.send("Hello wrld.")
 
         mSoc.on("message") { message ->
-//            mSoc.send("Server is returning the message back: " + message);
             Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
         }
 
         var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
         var jObject = JSONObject(params)
         mSoc.emit("joinRoom", jObject)
-//        mSoc.send(photoFile.readBytes().toString())
 
         mSoc.on("nxtControl"){
             Log.d("nxtControl", it[0].toString())
@@ -277,10 +280,10 @@ class CameraActivity : AppCompatActivity() {
 
             // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-
             // Preview
-            val preview = Preview.Builder()
-                .setTargetResolution(Size(640, 480))
+            var preview = Preview.Builder()
+                .setTargetResolution(Size(320, 240))
+                .setMaxResolution(Size(320, 240))
                 .build()
                 .also {
                     it.setSurfaceProvider(viewFinderValue.createSurfaceProvider())
@@ -295,8 +298,6 @@ class CameraActivity : AppCompatActivity() {
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-
 
             try {
                 // Unbind use cases before rebinding
