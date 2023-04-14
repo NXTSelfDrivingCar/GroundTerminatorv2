@@ -1,5 +1,10 @@
 package com.example.groundterminatorv2
 
+//import androidx.navigation.findNavController
+//import androidx.navigation.ui.AppBarConfiguration
+//import androidx.navigation.ui.setupActionBarWithNavController
+//import com.example.groundterminatorv2.databinding.ActivityLogInPage2Binding
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.os.StrictMode
@@ -10,8 +15,18 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.groundterminatorv2.databinding.ActivityLoginBinding
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
+
 import com.example.groundterminatorv2.httpHandler.HTTPResponse
 import com.example.groundterminatorv2.shared.CurrentUser
+
+import com.google.android.material.internal.ContextUtils.getActivity
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 
 class LoginActivity : AppCompatActivity() {
 

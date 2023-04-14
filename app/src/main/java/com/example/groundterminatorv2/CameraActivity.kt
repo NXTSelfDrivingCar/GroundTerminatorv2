@@ -2,15 +2,26 @@ package com.example.groundterminatorv2
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.addCallback
+
+import android.util.Size
+import android.view.View
+import android.widget.Button
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
@@ -18,10 +29,22 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+
 import com.example.groundterminatorv2.databinding.ActivityCameraBinding
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
+
+import com.example.groundterminatorv2.bluetoothManager.BluetoothResolver
+import com.example.groundterminatorv2.bluetoothManager.Motor
+import com.example.groundterminatorv2.bluetoothManager.NXTBluetoothController
+import com.example.groundterminatorv2.bluetoothManager.NXTCommand
+import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
+import kotlinx.android.synthetic.main.activity_camera.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.json.JSONObject
+
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
@@ -35,8 +58,11 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
+
     private lateinit var binding: ActivityCameraBinding
 
+    @SuppressLint("NewApi")
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d("test", "test1")
         setContentView(R.layout.activity_camera)
@@ -45,12 +71,17 @@ class CameraActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+
 //socket message button
         binding.btnSocketMessage.setOnClickListener{
         }
 
+
         // hide the action bar
         supportActionBar?.hide()
+        //
+        //mSoc.on("nxtControl", )
+
 
 //password change button
         binding.btnPasswordChange.setOnClickListener{
@@ -90,22 +121,110 @@ class CameraActivity : AppCompatActivity() {
 
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
+
         binding.btnCapture.setOnClickListener {
             //todo give functionality
+
+        findViewById<Button>(R.id.btnCapture).setOnClickListener {
+
+            val nmFPS = Math.round((1000 / 15).toDouble())
+            Timer().scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    GlobalScope.launch { compressSend() }
+                }
+            }, 0, nmFPS)
         }
-        outputDirectory = getOutputDirectory()
         cameraExecutor = Executors.newSingleThreadExecutor()
-    }
+
+        //BT stvari
+        val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
+        bluetoothResolver.init(this)
+        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
+        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+        if (bluetoothAdapter != null) {
+            if (bluetoothAdapter?.isEnabled == false) {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, 1)
+                Log.d("NXTTAG", bluetoothAdapter.isEnabled.toString() + "????")
+            }
+        }
 
 
     suspend fun compressSend(image: ImageProxy){
         val base64String = imageProxyToBase64(image)
+
+        var nxtController: NXTBluetoothController = NXTBluetoothController(bluetoothResolver)
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        nxtController.setSocket("NXT")
+        bluetoothResolver.connectSocket(nxtController.getSocket()!!)
+
+        mSoc.on("nxtControl") { message ->
+            var command = NXTCommand()
+
+            when(message[0]) {
+                "forward" -> {
+                    command.addControl(Motor.BOTH, 100)
+                    nxtController.runCommand(command)
+                }
+                "backward" -> {
+                    command.addControl(Motor.BOTH, -100)
+                    nxtController.runCommand(command)
+                }
+                "left" -> {
+                    command.addControl(Motor.LEFT, 100)
+                    nxtController.runCommand(command)
+                    command.addControl(Motor.RIGHT, -100)
+                    nxtController.runCommand(command)
+                }
+                "right" -> {
+                    command.addControl(Motor.RIGHT, 100)
+                    nxtController.runCommand(command)
+                    command.addControl(Motor.LEFT, -100)
+                    nxtController.runCommand(command)
+                }
+            }
+
+        }
+    }
+
+    private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
+        val planeProxy = image.planes[0]
+        val buffer: ByteBuffer = planeProxy.buffer
+        val bytes = ByteArray(buffer.remaining())
+        buffer.get(bytes)
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    }
+
+    fun compressSend(){
+        val base64String = imageProxyToBase64()
+
         mSoc.emit("stream", base64String)
     }
 
     @SuppressLint("NewApi")
-    private fun imageProxyToBase64(image: ImageProxy): String {
-        val planeProxy = image.planes[0]
+    private fun imageProxyToBase64(): String {
+        val source = findViewById<PreviewView>(R.id.viewFinder)
+
+        val stream = ByteArrayOutputStream()
+        source.bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+        val bytes = stream.toByteArray()
+
+
+        /*val planeProxy = image.planes[0]
         val buffer: ByteBuffer = planeProxy.buffer
         val bytes = ByteArray(buffer.remaining())
         buffer.get(bytes)
@@ -113,16 +232,42 @@ class CameraActivity : AppCompatActivity() {
         val bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         val stream = ByteArrayOutputStream()
 
-        bm.compress(Bitmap.CompressFormat.JPEG, 20, stream)
+        bm.compress(Bitmap.CompressFormat.WEBP_LOSSY, 20, stream)
 
-        val byteFormat = stream.toByteArray()
-        val imgString = Base64.getEncoder().encodeToString(byteFormat)
+        val byteFormat = stream.toByteArray()*/
+        val imgString = Base64.getEncoder().encodeToString(bytes)
 
         return imgString
     }
 
+
     val mSoc: Socket = IO.socket(HTTPHandler.Address+":5001");
 
+    fun connectWS(v: View){
+        Log.d("WSConnection", "Installing http client")
+        mSoc.connect();
+        Log.d("WSConnection", "Connected");
+        mSoc.send("Hello wrld.")
+
+        mSoc.on("message") { message ->
+//            mSoc.send("Server is returning the message back: " + message);
+            Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
+        }
+
+        var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
+        var jObject = JSONObject(params)
+        mSoc.emit("joinRoom", jObject)
+//        mSoc.send(photoFile.readBytes().toString())
+
+        mSoc.on("nxtControl"){
+            Log.d("nxtControl", it[0].toString())
+        }
+        Log.d("mini", jObject.toString())
+    }
+
+
+
+    @SuppressLint("RestrictedApi")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         val viewFinderValue = binding.viewFinder
@@ -135,18 +280,23 @@ class CameraActivity : AppCompatActivity() {
 
             // Preview
             val preview = Preview.Builder()
+                .setTargetResolution(Size(640, 480))
                 .build()
                 .also {
                     it.setSurfaceProvider(viewFinderValue.createSurfaceProvider())
                 }
 
             imageCapture = ImageCapture.Builder()
+                .setDefaultResolution(Size(320, 240))
+                .setMaxResolution(Size(320, 240))
                 .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
+
+
 
             try {
                 // Unbind use cases before rebinding
@@ -166,15 +316,6 @@ class CameraActivity : AppCompatActivity() {
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    // creates a folder inside internal storage
-    private fun getOutputDirectory(): File {
-        val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
-        }
-        return if (mediaDir != null && mediaDir.exists())
-            mediaDir else filesDir
     }
 
     // checks the camera permission

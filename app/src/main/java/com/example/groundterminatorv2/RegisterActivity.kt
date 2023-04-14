@@ -20,6 +20,12 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(R.layout.activity_register)
     }
 
+    fun btnLoginClicked(v: View){
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
 
     fun btnRegClicked(v: View) {
         val usernameValue: EditText = findViewById(R.id.etUsername)
