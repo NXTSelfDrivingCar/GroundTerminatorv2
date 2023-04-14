@@ -7,8 +7,6 @@ import android.widget.Button
 import android.widget.EditText
 import io.socket.client.IO
 import io.socket.client.Socket
-import kotlinx.android.synthetic.main.activity_socket_message.*
-
 class SocketMessageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

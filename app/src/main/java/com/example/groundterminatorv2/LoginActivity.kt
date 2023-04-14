@@ -13,8 +13,12 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.groundterminatorv2.databinding.ActivityLoginBinding
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
+
+import com.example.groundterminatorv2.httpHandler.HTTPResponse
 import com.example.groundterminatorv2.shared.CurrentUser
+
 import com.google.android.material.internal.ContextUtils.getActivity
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -24,49 +28,44 @@ import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 
-
 class LoginActivity : AppCompatActivity() {
+
+    //viewBinding implemented, replacing findViewById.
+    private lateinit var binding: ActivityLoginBinding
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    //    private lateinit var appBarConfiguration: AppBarConfiguration
-//    private lateinit var binding: ActivityLogInPage2Binding
-    super.onCreate(savedInstanceState)
-//        binding = ActivityLogInPage2Binding.inflate(layoutInflater)
-    setContentView(R.layout.activity_login)
-//
-//        setSupportActionBar(binding.toolbar)
-
-    val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
+        val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
     StrictMode.setThreadPolicy(policy)
-
 }
 
     fun logInButton(v: View) {
-        val usernameValue: EditText = findViewById<EditText>(R.id.etEmail)
-        val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
+        if (binding.etEmail.text.isNotEmpty() && binding.etPassword.text.isNotEmpty()) {
 
-        if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
-
-//            val client = HttpClient(CIO)
-//
-//            val response: HttpResponse = client.request("http://192.168.104.58:5000/user/login/mobile"){
-//                method = HttpMethod.Post
-//                headers {
-//                    append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
-//                }
-//                url {
-//                    parameters.append("username", usernameValue.text.toString())
-//                    parameters.append("password", passwordValue.text.toString())
-//                }
-//            }
-//
-//            Log.d("NXT", response.body())
-
-            var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
+            HTTPHandler.Address = "http://192.168."+binding.etServerAddress.text+":5000"
+            Toast.makeText(this, "${HTTPHandler.Address+":5000"}", Toast.LENGTH_SHORT).show()
+            var params = mapOf("username" to binding.etEmail.text, "password" to binding.etEmail.text)
 
             val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
 
-            var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+            var response : HTTPResponse? = null
+
+            //attempts to get a response, if no value leave function
+            try
+            {
+                response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+
+            } catch (E: Exception){
+                return;
+            }
+
+            //if response is null function has no values to work with
+            if(response==null)
+            {
+                return
+            }
 
             // Gets login status { OK | Unauthorized }
             var status = response.content.get("status")
@@ -83,6 +82,7 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
                 return
             }
+            //trims current tokens
             for(cookie in headerCookie!!){
                 Log.d("NXT Login cookie loop", cookie as String)
                 if(cookie.startsWith("auth=")){
