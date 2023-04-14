@@ -6,8 +6,18 @@ plugins {
 
 android {
     compileSdk 33
+<<<<<<< HEAD
 
+=======
+<<<<<<< Updated upstream
+>>>>>>> Refactoring
     compileSdkPreview "UpsideDownCake"
+=======
+<<<<<<< HEAD
+=======
+    compileSdkPreview "UpsideDownCake"
+>>>>>>> Refactoring
+>>>>>>> Stashed changes
 
     defaultConfig {
         applicationId "com.example.groundterminatorv2"

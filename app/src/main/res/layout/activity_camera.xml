@@ -126,7 +126,17 @@
         android:fontFamily="sans-serif-condensed-light"
         android:textColor="@color/white"
         android:text="WSConn"
+<<<<<<< HEAD
         android:onClick="connectWS"
+=======
+<<<<<<< Updated upstream
+=======
+<<<<<<< HEAD
+        android:onClick="connectWS"
+=======
+>>>>>>> Refactoring
+>>>>>>> Stashed changes
+>>>>>>> Refactoring
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnCapture"
         app:layout_constraintStart_toStartOf="parent" />

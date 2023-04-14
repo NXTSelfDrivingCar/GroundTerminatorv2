@@ -15,9 +15,31 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.groundterminatorv2.databinding.ActivityLoginBinding
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
+<<<<<<< HEAD
 
+=======
+<<<<<<< Updated upstream
+>>>>>>> Refactoring
 import com.example.groundterminatorv2.httpHandler.HTTPResponse
 import com.example.groundterminatorv2.shared.CurrentUser
+=======
+<<<<<<< HEAD
+import com.example.groundterminatorv2.shared.CurrentUser
+import com.google.android.material.internal.ContextUtils.getActivity
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import kotlinx.android.synthetic.main.activity_login.*
+
+=======
+import com.example.groundterminatorv2.httpHandler.HTTPResponse
+import com.example.groundterminatorv2.shared.CurrentUser
+>>>>>>> Refactoring
+>>>>>>> Stashed changes
 
 import com.google.android.material.internal.ContextUtils.getActivity
 import io.ktor.client.*

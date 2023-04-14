@@ -22,7 +22,10 @@ class NXTBluetoothController {
         }
 
         this.bluetoothSocket = bluetoothResolver.getPairedDeviceByName(socketName)
+<<<<<<< HEAD
         bluetoothResolver.connectSocket(bluetoothSocket!!)
+=======
+>>>>>>> Refactoring
     }
 
     /**
@@ -36,7 +39,11 @@ class NXTBluetoothController {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @RequiresPermission(value = "android.permission.BLUETOOTH_CONNECT")
     fun runCommand(nxtCommand: NXTCommand){
+<<<<<<< HEAD
         //bluetoothResolver.connectSocket(bluetoothSocket!!)
+=======
+        bluetoothResolver.connectSocket(bluetoothSocket!!)
+>>>>>>> Refactoring
 
         nxtCommand.getCommands().forEach{ command: ByteArray ->
 
@@ -44,7 +51,11 @@ class NXTBluetoothController {
             bluetoothSocket!!.outputStream.write(header, 0, header.size)
             bluetoothSocket!!.outputStream.write(command, 0, command.size)
 
+<<<<<<< HEAD
             //val result = bluetoothSocket!!.inputStream.readNBytes(5)
+=======
+            val result = bluetoothSocket!!.inputStream.readNBytes(5)
+>>>>>>> Refactoring
 
         }
 
