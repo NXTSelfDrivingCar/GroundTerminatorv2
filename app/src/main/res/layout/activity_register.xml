@@ -38,6 +38,8 @@
                 android:textStyle="bold" />
 
             <EditText
+                android:textColorHint="#000000"
+                android:textColor="@color/white"
                 android:id="@+id/etUsername"
                 android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
@@ -48,6 +50,8 @@
                 android:inputType="text" />
 
             <EditText
+                android:textColorHint="#000000"
+                android:textColor="@color/white"
                 android:id="@+id/etEmail"
                 android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
@@ -58,6 +62,8 @@
                 android:inputType="textAutoComplete" />
 
             <EditText
+                android:textColorHint="#000000"
+                android:textColor="@color/white"
                 android:id="@+id/etPassword"
                 android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
@@ -68,6 +74,8 @@
                 android:inputType="textPassword" />
 
             <EditText
+                android:textColorHint="#000000"
+                android:textColor="@color/white"
                 android:id="@+id/etConfirmPassword"
                 android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
@@ -79,17 +87,35 @@
 
             <Button
                 android:id="@+id/btnRegister"
-                android:layout_width="wrap_content"
+                android:layout_width="268dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:backgroundTint="@color/prussian_blue"
                 android:fontFamily="sans-serif-condensed-light"
                 android:onClick="btnRegClicked"
-                android:text="Register" />
+                android:text="Register"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="100dp"
+        android:backgroundTint="@color/prussian_blue"
+        android:fontFamily="sans-serif-condensed-light"
+        android:onClick="btnLoginClicked"
+        android:text="Login"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

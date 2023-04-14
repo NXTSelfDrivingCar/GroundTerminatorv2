@@ -9,6 +9,7 @@
     android:orientation="vertical"
     tools:context=".LoginActivity">
 
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="0dp"
@@ -63,6 +64,8 @@
 
 
             <EditText
+                android:textColorHint="#000000"
+                android:textColor="#000000"
                 android:id="@+id/etEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -73,6 +76,9 @@
                 android:inputType="textEmailAddress" />
 
             <EditText
+                android:textColorHint="#000000"
+                android:textColor="#000000"
+                android:scaleType="centerInside"
                 android:id="@+id/etPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -83,6 +89,8 @@
                 android:inputType="textPassword" />
 
             <Button
+                android:textColor="@color/white"
+                android:textStyle="bold"
                 android:id="@+id/btnLogIn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -113,5 +121,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardView" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
