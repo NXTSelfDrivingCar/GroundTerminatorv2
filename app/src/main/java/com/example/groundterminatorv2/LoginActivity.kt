@@ -1,74 +1,116 @@
 package com.example.groundterminatorv2
 
+//import androidx.navigation.findNavController
+//import androidx.navigation.ui.AppBarConfiguration
+//import androidx.navigation.ui.setupActionBarWithNavController
+//import com.example.groundterminatorv2.databinding.ActivityLogInPage2Binding
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Camera
 import android.os.Bundle
 import android.os.StrictMode
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
-//import androidx.navigation.findNavController
-//import androidx.navigation.ui.AppBarConfiguration
-//import androidx.navigation.ui.setupActionBarWithNavController
-//import com.example.groundterminatorv2.databinding.ActivityLogInPage2Binding
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.DataOutputStream
-import java.net.URL
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
+import com.example.groundterminatorv2.shared.CurrentUser
+import com.google.android.material.internal.ContextUtils.getActivity
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 
 
 class LoginActivity : AppCompatActivity() {
-//    private lateinit var appBarConfiguration: AppBarConfiguration
-//    private lateinit var binding: ActivityLogInPage2Binding
     override fun onCreate(savedInstanceState: Bundle?) {
+
+    //    private lateinit var appBarConfiguration: AppBarConfiguration
+//    private lateinit var binding: ActivityLogInPage2Binding
     super.onCreate(savedInstanceState)
 //        binding = ActivityLogInPage2Binding.inflate(layoutInflater)
-    setContentView(R.layout.activity_main)
+    setContentView(R.layout.activity_login)
 //
 //        setSupportActionBar(binding.toolbar)
 
-        val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy)
+    val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
+    StrictMode.setThreadPolicy(policy)
 
-    }
+}
 
     fun logInButton(v: View) {
         val usernameValue: EditText = findViewById<EditText>(R.id.etEmail)
         val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
 
+        if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
 
-        if (!usernameValue.text.isEmpty() && !passwordValue.text.isEmpty()) {
-            val url = URL("http://192.168.1.101:5000/user/login/mobile")
-            val postData = "username=" + usernameValue.text + "&password=" + passwordValue.text
+//            val client = HttpClient(CIO)
+//
+//            val response: HttpResponse = client.request("http://192.168.104.58:5000/user/login/mobile"){
+//                method = HttpMethod.Post
+//                headers {
+//                    append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
+//                }
+//                url {
+//                    parameters.append("username", usernameValue.text.toString())
+//                    parameters.append("password", passwordValue.text.toString())
+//                }
+//            }
+//
+//            Log.d("NXT", response.body())
 
-            val conn = url.openConnection()
-            conn.doOutput = true
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-            conn.setRequestProperty("Content-Length", postData.length.toString())
-            var odgovor: JSONObject? = null
-            DataOutputStream(conn.getOutputStream()).use { it.writeBytes(postData) }
-            BufferedReader(InputStreamReader(conn.getInputStream())).use { bf ->
-                var line: String?
-                while (bf.readLine().also { line = it } != null) {
-                    Log.d("NXT login", line as String) // Ovo ispisuje sta server kaze
-                    odgovor=JSONObject(line)
+            var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
+
+            val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
+
+            var response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+
+            // Gets login status { OK | Unauthorized }
+            var status = response.content.get("status")
+
+            // Gets header cookie { JWT }
+            var headerCookie = response.conn.headerFields["set-cookie"]
+
+            Log.d("NXT Login status", status as String)
+
+            var extractedToken: String? = null
+
+            // Handles token, and extracts just authorization part
+            if(headerCookie == null) {
+                Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
+                return
+            }
+            for(cookie in headerCookie!!){
+                Log.d("NXT Login cookie loop", cookie as String)
+                if(cookie.startsWith("auth=")){
+                    extractedToken = cookie.split(";")[0].replace("auth=", "")
                 }
             }
-            var status = odgovor!!.get("status").toString()
+
+            if(extractedToken == null) {
+                Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            Log.d("NXT Login token", extractedToken!!)
+
+            // Setting up the current user of the app
+            CurrentUser.token = extractedToken
+
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
-            if(status == "OK")
+            if(status == "loginComplete")
             {
+                Toast.makeText(this, "Logged in", Toast.LENGTH_SHORT).show()
                 val intent = Intent(this, CameraActivity::class.java)
                 startActivity(intent)
                 finish()
             }
-            else
+            else {
                 Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -78,5 +120,4 @@ class LoginActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    //убићу се јебено
 }

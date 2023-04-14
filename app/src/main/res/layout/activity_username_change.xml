@@ -4,14 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/login_bg"
-    android:gravity="center"
-    android:orientation="vertical"
-    tools:context=".LoginActivity"
-    >
+    android:background="@drawable/appbg"
+    tools:context=".UsernameChangeActivity">
+
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -30,53 +27,44 @@
             android:orientation="vertical">
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:fontFamily="serif-monospace"
-                android:gravity="center"
-                android:text="Enter your username and password"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:id="@+id/tvChangeUsername"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:fontFamily="sans-serif-condensed"
+                android:text="Change your username"
+                android:textColor="@color/prussian_blue"
+                android:textSize="20sp" />
 
             <EditText
-                android:id="@+id/etEmail"
+                android:id="@+id/etNewUsername"
+                android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:ems="10"
-                android:hint="Email"
-                android:inputType="textEmailAddress" />
+                android:layout_height="match_parent"
+                android:hint="Enter new username"/>
 
             <EditText
-                android:id="@+id/etPassword"
+                android:id="@+id/etCurrentPass"
+                android:fontFamily="sans-serif-condensed-light"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:layout_marginTop="20dp"
-                android:hint="Password"
-                android:inputType="textPassword" />
+                android:hint="Confirm password"
+                android:inputType="textPassword"/>
 
             <Button
-                android:id="@+id/btnlog"
+                android:id="@+id/btnConfirm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
-                android:text="log in"
-                android:onClick="logInButton"/>
-
-            <TextView
-                android:id="@+id/tvRegister"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Register"
-                android:layout_gravity="center"
-                android:onClick="RegisterButton"/>
+                android:backgroundTint="@color/prussian_blue"
+                android:fontFamily="sans-serif-condensed"
+                android:onClick="confirmButton"
+                android:text="CONFIRM" />
 
         </LinearLayout>
+
+
 
     </androidx.cardview.widget.CardView>
 

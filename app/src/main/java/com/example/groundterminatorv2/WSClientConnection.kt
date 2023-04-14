@@ -25,7 +25,9 @@ class WSClientConnection : AppCompatActivity() {
     fun onConnectionClick(v: View){
 
         Log.d("WSConnecion", "Installing http client")
-        val mSoc = IO.socket("http://192.168.0.23:5001");
+
+        val mSoc = IO.socket("http://192.168.216.58:5001");
+        
         mSoc.connect();
 
         Log.d("WSConnection", "Connected");
