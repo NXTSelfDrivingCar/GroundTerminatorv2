@@ -8,28 +8,23 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.groundterminatorv2.databinding.ActivityCameraBinding
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
-import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
-import kotlinx.android.synthetic.main.activity_camera.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -40,50 +35,46 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_camera)
+    private lateinit var binding: ActivityCameraBinding
 
-        btnDeleteAccount.setOnClickListener {
-            val intent = Intent(this, DeleteAccountActivity::class.java)
-            intent.putExtra("popuptitle", "Error")
-            intent.putExtra("popuptext", "Sorry, that email address is already used!")
-            intent.putExtra("popupbtn", "OK")
-            intent.putExtra("darkstatusbar", false)
-            startActivity(intent)
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("test", "test1")
+        setContentView(R.layout.activity_camera)
+        super.onCreate(savedInstanceState)
+        binding = ActivityCameraBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
 //socket message button
-        findViewById<Button>(R.id.btnSocketMessage).setOnClickListener{
+        binding.btnSocketMessage.setOnClickListener{
         }
 
         // hide the action bar
         supportActionBar?.hide()
 
 //password change button
-        findViewById<Button>(R.id.btnPasswordChange).setOnClickListener{
+        binding.btnPasswordChange.setOnClickListener{
             val intentPassChange = Intent(this, PasswordChangeActivity::class.java)
             startActivity(intentPassChange)
             finish()
         }
 
 // Username change button
-        findViewById<Button>(R.id.btnUsernameChange).setOnClickListener{
+        binding.btnUsernameChange.setOnClickListener{
             val intentUsernameChange = Intent(this, UsernameChangeActivity::class.java)
             startActivity(intentUsernameChange)
             finish()
         }
 
 //Email change
-        findViewById<Button>(R.id.btnEmailChange).setOnClickListener{
+        binding.btnEmailChange.setOnClickListener{
             val intentEmailChange = Intent(this, EmailChangeActivity::class.java)
             startActivity(intentEmailChange)
             finish()
         }
 
-        val btnDelAccValue = findViewById<Button>(R.id.btnDeleteAccount)
 //delete account activity
-        btnDelAccValue.setOnClickListener{
+        binding.btnDeleteAccount.setOnClickListener{
             val intentDeleteAccountActivity = Intent(this, DeleteAccountActivity::class.java)
             startActivity(intentDeleteAccountActivity)
             finish()
@@ -99,7 +90,7 @@ class CameraActivity : AppCompatActivity() {
 
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
-        findViewById<Button>(R.id.btnCapture).setOnClickListener {
+        binding.btnCapture.setOnClickListener {
             //todo give functionality
         }
         outputDirectory = getOutputDirectory()
@@ -132,10 +123,10 @@ class CameraActivity : AppCompatActivity() {
 
     val mSoc: Socket = IO.socket(HTTPHandler.Address+":5001");
 
-
-
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        val viewFinderValue = binding.viewFinder
+
 
         cameraProviderFuture.addListener(Runnable {
 
@@ -146,7 +137,7 @@ class CameraActivity : AppCompatActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                    it.setSurfaceProvider(viewFinderValue.createSurfaceProvider())
                 }
 
             imageCapture = ImageCapture.Builder()

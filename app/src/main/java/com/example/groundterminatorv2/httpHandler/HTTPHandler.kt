@@ -22,7 +22,7 @@ class HTTPResponse {
 
 class HTTPHandler {
     companion object{
-        var Address: String = "http://192.168.0.19"
+        var Address: String = "http://192.168.1.28"
 
 
         fun handlePostMethod(route: String, postData: String): HTTPResponse{

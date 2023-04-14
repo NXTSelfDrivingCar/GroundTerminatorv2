@@ -8,50 +8,30 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.groundterminatorv2.databinding.ActivityLoginBinding
 import com.example.groundterminatorv2.httpHandler.HTTPHandler
-<<<<<<< Updated upstream
-//import androidx.navigation.findNavController
-//import androidx.navigation.ui.AppBarConfiguration
-//import androidx.navigation.ui.setupActionBarWithNavController
-//import com.example.groundterminatorv2.databinding.ActivityLogInPage2Binding
-import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.DataOutputStream
-import java.net.URL
-=======
 import com.example.groundterminatorv2.httpHandler.HTTPResponse
->>>>>>> Stashed changes
 import com.example.groundterminatorv2.shared.CurrentUser
-import com.example.groundterminatorv2.httpHandler.HTTPResponse
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import kotlinx.android.synthetic.main.activity_login.*
-
 
 class LoginActivity : AppCompatActivity() {
+
+    //viewBinding implemented, replacing findViewById.
+    private lateinit var binding: ActivityLoginBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-    setContentView(R.layout.activity_login)
+        binding = ActivityLoginBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
+        val policy : StrictMode.ThreadPolicy  = StrictMode.ThreadPolicy.Builder().permitAll().build();
     StrictMode.setThreadPolicy(policy)
 }
 
     fun logInButton(v: View) {
-        val usernameValue: EditText = findViewById<EditText>(R.id.etEmail)
-        val passwordValue: EditText = findViewById<EditText>(R.id.etPassword)
+        if (binding.etEmail.text.isNotEmpty() && binding.etPassword.text.isNotEmpty()) {
 
-        if (usernameValue.text.isNotEmpty() && passwordValue.text.isNotEmpty()) {
-
-            HTTPHandler.Address = "http://192.168."+etServerAddress.text
+            HTTPHandler.Address = "http://192.168."+binding.etServerAddress.text+":5000"
             Toast.makeText(this, "${HTTPHandler.Address+":5000"}", Toast.LENGTH_SHORT).show()
-            var params = mapOf("username" to usernameValue.text, "password" to passwordValue.text)
+            var params = mapOf("username" to binding.etEmail.text, "password" to binding.etEmail.text)
 
             val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
 
