@@ -12,6 +12,11 @@ import android.opengl.Matrix
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+
+import android.widget.Button
+import android.widget.Toast
+import androidx.activity.addCallback
+
 import android.util.Size
 import android.view.OrientationEventListener
 import android.view.Surface
@@ -22,6 +27,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
@@ -30,6 +36,10 @@ import androidx.camera.view.PreviewView
 import androidx.camera.view.PreviewView.ImplementationMode
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+
+import com.example.groundterminatorv2.databinding.ActivityCameraBinding
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
+
 import com.example.groundterminatorv2.bluetoothManager.BluetoothResolver
 import com.example.groundterminatorv2.bluetoothManager.Motor
 import com.example.groundterminatorv2.bluetoothManager.NXTBluetoothController
@@ -41,6 +51,7 @@ import kotlinx.android.synthetic.main.activity_camera.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.ByteBuffer
@@ -54,11 +65,19 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
+
+    private lateinit var binding: ActivityCameraBinding
+
     @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        Log.d("test", "test1")
         setContentView(R.layout.activity_camera)
+        super.onCreate(savedInstanceState)
+        binding = ActivityCameraBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -69,7 +88,13 @@ class CameraActivity : AppCompatActivity() {
             intent.putExtra("popupbtn", "OK")
             intent.putExtra("darkstatusbar", false)
             startActivity(intent)
+
+
+//socket message button
+        binding.btnSocketMessage.setOnClickListener{
+
         }
+
 
         // hide the action bar
         supportActionBar?.hide()
@@ -78,29 +103,28 @@ class CameraActivity : AppCompatActivity() {
 
 
 //password change button
-        findViewById<Button>(R.id.btnPasswordChange).setOnClickListener{
+        binding.btnPasswordChange.setOnClickListener{
             val intentPassChange = Intent(this, PasswordChangeActivity::class.java)
             startActivity(intentPassChange)
             finish()
         }
 
 // Username change button
-        findViewById<Button>(R.id.btnUsernameChange).setOnClickListener{
+        binding.btnUsernameChange.setOnClickListener{
             val intentUsernameChange = Intent(this, UsernameChangeActivity::class.java)
             startActivity(intentUsernameChange)
             finish()
         }
 
 //Email change
-        findViewById<Button>(R.id.btnEmailChange).setOnClickListener{
+        binding.btnEmailChange.setOnClickListener{
             val intentEmailChange = Intent(this, EmailChangeActivity::class.java)
             startActivity(intentEmailChange)
             finish()
         }
 
-        val btnDelAccValue = findViewById<Button>(R.id.btnDeleteAccount)
 //delete account activity
-        btnDelAccValue.setOnClickListener{
+        binding.btnDeleteAccount.setOnClickListener{
             val intentDeleteAccountActivity = Intent(this, DeleteAccountActivity::class.java)
             startActivity(intentDeleteAccountActivity)
             finish()
@@ -116,6 +140,10 @@ class CameraActivity : AppCompatActivity() {
 
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
+
+        binding.btnCapture.setOnClickListener {
+            //todo give functionality
+
         findViewById<Button>(R.id.btnCapture).setOnClickListener {
 
             val nmFPS = Math.round((1000 / 10).toDouble())
@@ -130,6 +158,10 @@ class CameraActivity : AppCompatActivity() {
         //BT stvari
         val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
         bluetoothResolver.init(this)
+
+
+    suspend fun compressSend(image: ImageProxy){
+        val base64String = imageProxyToBase64(image)
 
         var nxtController: NXTBluetoothController = NXTBluetoothController(bluetoothResolver)
 
@@ -192,6 +224,7 @@ class CameraActivity : AppCompatActivity() {
 
     fun compressSend(){
         val base64String = imageProxyToBase64()
+
         mSoc.emit("stream", base64String)
     }
 
@@ -212,7 +245,8 @@ class CameraActivity : AppCompatActivity() {
         return imgString
     }
 
-    private val mSoc: Socket = IO.socket("http://192.168.0.11:5001");
+
+    val mSoc: Socket = IO.socket(HTTPHandler.Address+":5001");
 
     fun connectWS(v: View){
         Log.d("WSConnection", "Installing http client")
@@ -235,9 +269,12 @@ class CameraActivity : AppCompatActivity() {
     }
 
 
+
     @SuppressLint("RestrictedApi")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        val viewFinderValue = binding.viewFinder
+
 
         cameraProviderFuture.addListener(Runnable {
 
@@ -249,7 +286,7 @@ class CameraActivity : AppCompatActivity() {
                 .setMaxResolution(Size(320, 240))
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                    it.setSurfaceProvider(viewFinderValue.createSurfaceProvider())
                 }
 
             imageCapture = ImageCapture.Builder()
@@ -257,6 +294,7 @@ class CameraActivity : AppCompatActivity() {
                 .setMaxResolution(Size(320, 240))
                 .setCaptureMode(CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
+
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA

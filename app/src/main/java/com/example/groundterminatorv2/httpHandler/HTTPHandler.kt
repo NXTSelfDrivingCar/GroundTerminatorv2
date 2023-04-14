@@ -9,7 +9,9 @@ import java.io.DataOutputStream
 import java.net.URL
 import java.net.URLConnection
 
+
 val Address: String = "http://192.168.0.11:5000"
+
 
 class HTTPResponse {
     lateinit var conn: URLConnection
@@ -23,6 +25,8 @@ class HTTPResponse {
 
 class HTTPHandler {
     companion object{
+        var Address: String = "http://192.168.1.28"
+
 
         fun handlePostMethod(route: String, postData: String): HTTPResponse{
             val tmpRoute = resolveRoute(route)
