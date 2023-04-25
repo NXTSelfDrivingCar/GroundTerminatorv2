@@ -2,59 +2,42 @@ package com.example.groundterminatorv2
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.opengl.Matrix
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
-
-import android.widget.Button
-import android.widget.Toast
-import androidx.activity.addCallback
-
 import android.util.Size
-import android.view.OrientationEventListener
-import android.view.Surface
-import android.view.Surface.ROTATION_270
-import android.view.Surface.ROTATION_90
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
-import androidx.camera.view.PreviewView.ImplementationMode
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-
-import com.example.groundterminatorv2.databinding.ActivityCameraBinding
-import com.example.groundterminatorv2.httpHandler.HTTPHandler
-
+import com.example.groundterminatorv2.WSHandler.WSHandler
 import com.example.groundterminatorv2.bluetoothManager.BluetoothResolver
 import com.example.groundterminatorv2.bluetoothManager.Motor
 import com.example.groundterminatorv2.bluetoothManager.NXTBluetoothController
 import com.example.groundterminatorv2.bluetoothManager.NXTCommand
+import com.example.groundterminatorv2.databinding.ActivityCameraBinding
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
 import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
-import kotlinx.android.synthetic.main.activity_camera.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.nio.ByteBuffer
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -71,30 +54,25 @@ class CameraActivity : AppCompatActivity() {
     @SuppressLint("NewApi")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("test", "test1")
-        setContentView(R.layout.activity_camera)
         super.onCreate(savedInstanceState)
         binding = ActivityCameraBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
+        //connect to Web socket function
+        connectWS()
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        //TODO ???
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        btnDeleteAccount.setOnClickListener {
+        binding.btnDeleteAccount.setOnClickListener {
             val intent = Intent(this, DeleteAccountActivity::class.java)
             intent.putExtra("popuptitle", "Error")
             intent.putExtra("popuptext", "Sorry, that email address is already used!")
             intent.putExtra("popupbtn", "OK")
             intent.putExtra("darkstatusbar", false)
             startActivity(intent)
-
-
-//socket message button
-        binding.btnSocketMessage.setOnClickListener{
-
         }
-
 
         // hide the action bar
         supportActionBar?.hide()
@@ -103,28 +81,28 @@ class CameraActivity : AppCompatActivity() {
 
 
 //password change button
-        binding.btnPasswordChange.setOnClickListener{
+        binding.btnPasswordChange.setOnClickListener {
             val intentPassChange = Intent(this, PasswordChangeActivity::class.java)
             startActivity(intentPassChange)
             finish()
         }
 
 // Username change button
-        binding.btnUsernameChange.setOnClickListener{
+        binding.btnUsernameChange.setOnClickListener {
             val intentUsernameChange = Intent(this, UsernameChangeActivity::class.java)
             startActivity(intentUsernameChange)
             finish()
         }
 
 //Email change
-        binding.btnEmailChange.setOnClickListener{
+        binding.btnEmailChange.setOnClickListener {
             val intentEmailChange = Intent(this, EmailChangeActivity::class.java)
             startActivity(intentEmailChange)
             finish()
         }
 
 //delete account activity
-        binding.btnDeleteAccount.setOnClickListener{
+        binding.btnDeleteAccount.setOnClickListener {
             val intentDeleteAccountActivity = Intent(this, DeleteAccountActivity::class.java)
             startActivity(intentDeleteAccountActivity)
             finish()
@@ -142,49 +120,43 @@ class CameraActivity : AppCompatActivity() {
         // it calls a method which is implemented below
 
         binding.btnCapture.setOnClickListener {
-            //todo give functionality
-
-        findViewById<Button>(R.id.btnCapture).setOnClickListener {
-
             val nmFPS = Math.round((1000 / 10).toDouble())
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
-                    GlobalScope.launch { compressSend() }
+                    compressSend()
                 }
             }, 0, nmFPS)
         }
         cameraExecutor = Executors.newSingleThreadExecutor()
+    }
 
-        //BT stvari
-        val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
-        bluetoothResolver.init(this)
+    //BT
+    private val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
 
 
-    suspend fun compressSend(image: ImageProxy){
-        val base64String = imageProxyToBase64(image)
-
+/*
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    suspend fun compressSend(image: ImageProxy) {
+        val base64String = imageProxyToBase64()
         var nxtController: NXTBluetoothController = NXTBluetoothController(bluetoothResolver)
 
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.BLUETOOTH_CONNECT
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
+        {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
             return
         }
         nxtController.setSocket("NXT")
 
-        mSoc.on("NXTControl") { message ->
+        mSoc.on("NXTControl")
+        { message ->
             var command = NXTCommand()
-
-            when(message[0]) {
+            when (message[0]) {
                 "up" -> {
                     command.addControl(Motor.BOTH, 100)
                     nxtController.runCommand(command)
@@ -221,22 +193,30 @@ class CameraActivity : AppCompatActivity() {
 
         }
     }
+*/
 
-    fun compressSend(){
+    fun compressSend() {
         val base64String = imageProxyToBase64()
-
         mSoc.emit("stream", base64String)
     }
 
     @SuppressLint("NewApi")
-    private fun imageProxyToBase64(): String {
-        val source = findViewById<PreviewView>(R.id.viewFinder)
+    fun imageProxyToBase64(): String {
 
+        val source = binding.viewFinder
         val stream = ByteArrayOutputStream()
 
         var matrix = android.graphics.Matrix()
         matrix.postRotate(270f)
-        val bp = Bitmap.createBitmap(source.bitmap!!, 0, 0, source.bitmap!!.width, source.bitmap!!.height, matrix, true)
+        val bp = Bitmap.createBitmap(
+            source.bitmap!!,
+            0,
+            0,
+            source.bitmap!!.width,
+            source.bitmap!!.height,
+            matrix,
+            true
+        )
 
         bp.compress(Bitmap.CompressFormat.JPEG, 20, stream)
         val bytes = stream.toByteArray()
@@ -246,28 +226,30 @@ class CameraActivity : AppCompatActivity() {
     }
 
 
-    val mSoc: Socket = IO.socket(HTTPHandler.Address+":5001");
+    private val mSoc: Socket = IO.socket(WSHandler.getAddress());
 
-    fun connectWS(v: View){
+    private fun connectWS() {
         Log.d("WSConnection", "Installing http client")
         mSoc.connect();
         Log.d("WSConnection", "Connected");
         mSoc.send("Hello wrld.")
 
         mSoc.on("message") { message ->
-            Log.d("mesig: ", "WebSocketConnectionHandler. Message received: " + message[0])
+            Log.d(
+                "message: ",
+                "WebSocketConnectionHandler. Message received: " + message[0]
+            )
         }
 
         var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
         var jObject = JSONObject(params)
         mSoc.emit("joinRoom", jObject)
 
-        mSoc.on("nxtControl"){
+        mSoc.on("nxtControl") {
             Log.d("nxtControl", it[0].toString())
         }
         Log.d("mini", jObject.toString())
     }
-
 
 
     @SuppressLint("RestrictedApi")
@@ -278,15 +260,15 @@ class CameraActivity : AppCompatActivity() {
 
         cameraProviderFuture.addListener(Runnable {
 
-            // Used to bind the lifecycle of cameras to the lifecycle owner
+                        // Used to bind the lifecycle of cameras to the lifecycle owner
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            // Preview
+                        // Preview
             var preview = Preview.Builder()
                 .setTargetResolution(Size(320, 240))
                 .setMaxResolution(Size(320, 240))
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinderValue.createSurfaceProvider())
+                    it.setSurfaceProvider(viewFinderValue.getSurfaceProvider())
                 }
 
             imageCapture = ImageCapture.Builder()
@@ -296,7 +278,7 @@ class CameraActivity : AppCompatActivity() {
                 .build()
 
 
-            // Select back camera as a default
+                        // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
             try {
@@ -306,17 +288,19 @@ class CameraActivity : AppCompatActivity() {
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
                     this, cameraSelector, preview, imageCapture
-                )
+                            )
 
             } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
-
         }, ContextCompat.getMainExecutor(this))
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(
+            baseContext,
+            it
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     // checks the camera permission
@@ -333,7 +317,11 @@ class CameraActivity : AppCompatActivity() {
                 // If permissions are not granted,
                 // present a toast to notify the user that
                 // the permissions were not granted.
-                Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT)
+                Toast.makeText(
+                    this,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
+                )
                     .show()
                 finish()
             }
