@@ -33,10 +33,9 @@ class RegisterActivity : AppCompatActivity() {
         val passwordValue: EditText = findViewById(R.id.etPassword)
         val confirmPasswordValue: EditText = findViewById(R.id.etConfirmPassword)
 
-        Log.d("prazno", (usernameValue.text.isEmpty() || emailValue.text.isEmpty() || passwordValue.text.isEmpty() || confirmPasswordValue.text.isEmpty()).toString())
         if(usernameValue.text.isEmpty() || emailValue.text.isEmpty() || passwordValue.text.isEmpty() || confirmPasswordValue.text.isEmpty())
         {
-            Toast.makeText(this, "Polje je prazno.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Sva polja su obavezna.", Toast.LENGTH_SHORT).show()
             return
         }
 

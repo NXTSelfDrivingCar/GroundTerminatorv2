@@ -63,23 +63,3 @@ class DeleteAccountActivity : AppCompatActivity() {
         Log.d("NXT Login status", status as String)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

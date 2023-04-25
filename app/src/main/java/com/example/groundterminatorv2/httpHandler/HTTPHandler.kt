@@ -1,6 +1,5 @@
 package com.example.groundterminatorv2.httpHandler
 
-import android.util.ArrayMap
 import android.util.Log
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -9,24 +8,22 @@ import java.io.DataOutputStream
 import java.net.URL
 import java.net.URLConnection
 
+class HTTPResponse(var conn: URLConnection, var content: JSONObject) {
 
-val Address: String = "http://192.168.0.11:5000"
-
-
-class HTTPResponse {
-    lateinit var conn: URLConnection
-    lateinit var content: JSONObject
-
-    constructor(conn: URLConnection, content: JSONObject){
-        this.conn = conn
-        this.content = content
-    }
 }
 
 class HTTPHandler {
     companion object{
-        var Address: String = "http://192.168.1.28"
+        private var Address: String = "http://192.168.1.23"
 
+        fun setAddress(address: String, port: String)
+        {
+            Address= "http://$address:$port"
+        }
+        fun getAddress(): String
+        {
+            return Address
+        }
 
         fun handlePostMethod(route: String, postData: String): HTTPResponse{
             val tmpRoute = resolveRoute(route)
@@ -56,7 +53,7 @@ class HTTPHandler {
         }
 
         fun postMethod(route: String, postData: String): JSONObject?{
-            return null;
+            return null
         }
 
         // Resolves routes if starting without '/'

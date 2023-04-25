@@ -117,42 +117,4 @@
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btnWSConnect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
-        android:backgroundTint="@color/black"
-        android:fontFamily="sans-serif-condensed-light"
-        android:textColor="@color/white"
-        android:text="WSConn"
-<<<<<<< HEAD
-        android:onClick="connectWS"
-=======
-<<<<<<< Updated upstream
-=======
-<<<<<<< HEAD
-        android:onClick="connectWS"
-=======
->>>>>>> Refactoring
->>>>>>> Stashed changes
->>>>>>> Refactoring
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnCapture"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnSocketMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
-        android:backgroundTint="@color/black"
-        android:fontFamily="sans-serif-condensed-light"
-        android:textColor="@color/white"
-        android:text="mSocMSG"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnCapture" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
