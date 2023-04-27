@@ -8,33 +8,23 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.util.Size
-import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.groundterminatorv2.WSHandler.WSHandler
 import com.example.groundterminatorv2.bluetoothManager.BluetoothResolver
-import com.example.groundterminatorv2.bluetoothManager.Motor
-import com.example.groundterminatorv2.bluetoothManager.NXTBluetoothController
-import com.example.groundterminatorv2.bluetoothManager.NXTCommand
 import com.example.groundterminatorv2.databinding.ActivityCameraBinding
-import com.example.groundterminatorv2.httpHandler.HTTPHandler
 import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -59,8 +49,9 @@ class CameraActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        //connect to Web socket function
-        connectWS()
+        //instances class and calls connect method
+        val wshInstance = WSHandler("http://localhost:5001")
+        wshInstance.connectWS()
 
         //TODO ???
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -76,8 +67,6 @@ class CameraActivity : AppCompatActivity() {
 
         // hide the action bar
         supportActionBar?.hide()
-        //
-        //mSoc.on("nxtControl", )
 
 
 //password change button
@@ -228,28 +217,7 @@ class CameraActivity : AppCompatActivity() {
 
     private val mSoc: Socket = IO.socket(WSHandler.getAddress());
 
-    private fun connectWS() {
-        Log.d("WSConnection", "Installing http client")
-        mSoc.connect();
-        Log.d("WSConnection", "Connected");
-        mSoc.send("Hello wrld.")
 
-        mSoc.on("message") { message ->
-            Log.d(
-                "message: ",
-                "WebSocketConnectionHandler. Message received: " + message[0]
-            )
-        }
-
-        var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
-        var jObject = JSONObject(params)
-        mSoc.emit("joinRoom", jObject)
-
-        mSoc.on("nxtControl") {
-            Log.d("nxtControl", it[0].toString())
-        }
-        Log.d("mini", jObject.toString())
-    }
 
 
     @SuppressLint("RestrictedApi")
