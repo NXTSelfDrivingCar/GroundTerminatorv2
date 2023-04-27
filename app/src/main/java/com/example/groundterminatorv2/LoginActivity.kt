@@ -72,6 +72,7 @@ class LoginActivity : AppCompatActivity() {
 
             val postData = params.map {(k, v) -> "${(k)}=${v}"}.joinToString("&")
 
+<<<<<<< Updated upstream
             var response : HTTPResponse? = null
 
             //attempts to get a response, if no value leave function
@@ -109,6 +110,15 @@ class LoginActivity : AppCompatActivity() {
                 Log.d("NXT Login cookie loop", cookie as String)
                 if(cookie.startsWith("auth=")){
                     extractedToken = cookie.split(";")[0].replace("auth=", "")
+=======
+                //attempts to get a response, if no value leave function
+                try
+                {
+                    response = HTTPHandler.handlePostMethod("/user/login/mobile", postData)
+                } catch (E: Exception){
+                    Toast.makeText(this, "login failed", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+>>>>>>> Stashed changes
                 }
             }
 
@@ -122,6 +132,7 @@ class LoginActivity : AppCompatActivity() {
             // Setting up the current user of the app
             CurrentUser.token = extractedToken
 
+<<<<<<< Updated upstream
             Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
             if(status == "loginComplete")
             {
@@ -132,6 +143,45 @@ class LoginActivity : AppCompatActivity() {
             }
             else {
                 Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+=======
+                Log.d("NXT Login status", status as String)
+
+                var extractedToken: String? = null
+
+                if(headerCookie == null) {
+                    Toast.makeText(this, "Unable to retrieve cookie", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                // Handles token, and extracts just authorization part
+                //trims current tokens
+                for(cookie in headerCookie!!){
+                    Log.d("NXT Login cookie loop", cookie as String)
+                    if(cookie.startsWith("auth=")){
+                        extractedToken = cookie.split(";")[0].replace("auth=", "")
+                    }
+                }
+
+                if(extractedToken == null) {
+                    Toast.makeText(this, "Error, invalid token", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                Log.d("NXT Login token", extractedToken!!)
+
+                // Setting up the current user of the app
+                CurrentUser.token = extractedToken
+
+                if(status == "loginComplete")
+                {
+                    Toast.makeText(this, "Logged in", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this, CameraActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+                else {
+                    Toast.makeText(this, "$status", Toast.LENGTH_SHORT).show()
+                }
+>>>>>>> Stashed changes
             }
         }
     }

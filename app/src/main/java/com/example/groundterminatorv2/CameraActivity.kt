@@ -64,6 +64,7 @@ class CameraActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var webSocketHandler: WSHandler
 
 
     private lateinit var binding: ActivityCameraBinding
@@ -78,6 +79,14 @@ class CameraActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+<<<<<<< Updated upstream
+=======
+
+
+        //instances class and calls connect method
+        webSocketHandler = WSHandler("http://192.168.1.23:5001")
+        webSocketHandler.init()
+>>>>>>> Stashed changes
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -224,8 +233,12 @@ class CameraActivity : AppCompatActivity() {
 
     fun compressSend(){
         val base64String = imageProxyToBase64()
+<<<<<<< Updated upstream
 
         mSoc.emit("stream", base64String)
+=======
+//        socket.emit("stream", base64String)
+>>>>>>> Stashed changes
     }
 
     @SuppressLint("NewApi")
@@ -245,6 +258,7 @@ class CameraActivity : AppCompatActivity() {
         return imgString
     }
 
+<<<<<<< Updated upstream
 
     val mSoc: Socket = IO.socket(HTTPHandler.Address+":5001");
 
@@ -270,6 +284,8 @@ class CameraActivity : AppCompatActivity() {
 
 
 
+=======
+>>>>>>> Stashed changes
     @SuppressLint("RestrictedApi")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
