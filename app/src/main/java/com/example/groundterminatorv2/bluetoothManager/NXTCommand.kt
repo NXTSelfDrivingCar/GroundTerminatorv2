@@ -22,18 +22,20 @@ class NXTCommand {
      * @param power Intensity of motor rotation
      */
 
-    public fun stop(): NXTCommand {
+    public fun addControl(motor: Motor, power: Byte): NXTCommand {
         var command = byteArrayOf(
-            0x80.toByte(), 0x4, 0xff.toByte(), 0, 0x02, 0x01, 0x64, 0x20, 0, 0, 0,
-            0
-        )
+            0x80.toByte(), 0x4, motor.value, power, 0x01, 0x01, 0x64, 0x20, 0, 0, 0,
+            0)
+
+        commands.add(command)
+
         return this
     }
 
-    public fun addControl(motor: Motor, power: Int): NXTCommand {
+    public fun stop(): NXTCommand {
         var command = byteArrayOf(
-            0x00, 0x4, motor.value, power.toByte(), 0x01, 0x01, 0x64, 0x20, 0, 0, 0,
-            0xff.toByte())
+            0x80.toByte(), 0x4, 0xff.toByte(), 0, 0x02, 0x01, 0x64, 0x20, 0, 0, 0,
+            0)
 
         commands.add(command)
 
