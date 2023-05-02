@@ -8,23 +8,34 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.Size
+import android.view.View
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.core.ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.groundterminatorv2.WSHandler.WSHandler
 import com.example.groundterminatorv2.bluetoothManager.BluetoothResolver
+import com.example.groundterminatorv2.bluetoothManager.Motor
+import com.example.groundterminatorv2.bluetoothManager.NXTBluetoothController
+import com.example.groundterminatorv2.bluetoothManager.NXTCommand
 import com.example.groundterminatorv2.databinding.ActivityCameraBinding
+import com.example.groundterminatorv2.httpHandler.HTTPHandler
 import com.example.groundterminatorv2.shared.CurrentUser
 import io.socket.client.IO
 import io.socket.client.Socket
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -49,9 +60,8 @@ class CameraActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
-        //instances class and calls connect method
-        val wshInstance = WSHandler("http://localhost:5001")
-        wshInstance.connectWS()
+        //connect to Web socket function
+        connectWS()
 
         //TODO ???
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -67,6 +77,8 @@ class CameraActivity : AppCompatActivity() {
 
         // hide the action bar
         supportActionBar?.hide()
+        //
+        //mSoc.on("nxtControl", )
 
 
 //password change button
@@ -108,81 +120,85 @@ class CameraActivity : AppCompatActivity() {
         // set on click listener for the button of capture photo
         // it calls a method which is implemented below
 
-        binding.btnCapture.setOnClickListener {
-            val nmFPS = Math.round((1000 / 10).toDouble())
-            Timer().scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    compressSend()
-                }
-            }, 0, nmFPS)
+        lateinit var runnable: Runnable
+        var handler = Handler(Looper.getMainLooper())
+        var interval = Math.round((1000 / 15).toDouble())
+
+        runnable = Runnable {
+            compressSend()
+
+            handler.postDelayed(runnable, interval)
+        }
+
+        findViewById<Button>(R.id.btnCapture).setOnClickListener {
+            handler.postDelayed(runnable, interval)
         }
         cameraExecutor = Executors.newSingleThreadExecutor()
-    }
 
-    //BT
-    private val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
+        //BT stvari
+        val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
+        bluetoothResolver.init(this)
 
-
-/*
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun compressSend(image: ImageProxy) {
-        val base64String = imageProxyToBase64()
         var nxtController: NXTBluetoothController = NXTBluetoothController(bluetoothResolver)
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED)
-        {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
             return
         }
         nxtController.setSocket("NXT")
 
-        mSoc.on("NXTControl")
-        { message ->
+        mSoc.on("NXTControl") { message ->
             var command = NXTCommand()
+
             when (message[0]) {
                 "up" -> {
-                    command.addControl(Motor.BOTH, 100)
+                    command.addControl(Motor.BOTH, 70)
                     nxtController.runCommand(command)
                     Thread.sleep(100)
                     command.stop()
                     nxtController.runCommand(command)
                 }
                 "down" -> {
-                    command.addControl(Motor.BOTH, -100)
+                    command.addControl(Motor.BOTH, -70)
                     nxtController.runCommand(command)
                     Thread.sleep(100)
                     command.stop()
                     nxtController.runCommand(command)
                 }
                 "left" -> {
-                    command.addControl(Motor.LEFT, 100)
+                    command.addControl(Motor.LEFT, 80)
                     nxtController.runCommand(command)
-                    command.addControl(Motor.RIGHT, -100)
+                    command.addControl(Motor.RIGHT, -80)
                     nxtController.runCommand(command)
                     Thread.sleep(100)
                     command.stop()
                     nxtController.runCommand(command)
                 }
                 "right" -> {
-                    command.addControl(Motor.RIGHT, 100)
+                    command.addControl(Motor.RIGHT, 80)
                     nxtController.runCommand(command)
-                    command.addControl(Motor.LEFT, -100)
+                    command.addControl(Motor.LEFT, -80)
                     nxtController.runCommand(command)
                     Thread.sleep(100)
                     command.stop()
                     nxtController.runCommand(command)
                 }
             }
-
         }
     }
-*/
+
+    //BT
+    private val bluetoothResolver: BluetoothResolver = BluetoothResolver.getInstance()
 
     fun compressSend() {
         val base64String = imageProxyToBase64()
@@ -217,7 +233,28 @@ class CameraActivity : AppCompatActivity() {
 
     private val mSoc: Socket = IO.socket(WSHandler.getAddress());
 
+    private fun connectWS() {
+        Log.d("WSConnection", "Installing http client")
+        mSoc.connect();
+        Log.d("WSConnection", "Connected");
+        mSoc.send("Hello wrld.")
 
+        mSoc.on("message") { message ->
+            Log.d(
+                "message: ",
+                "WebSocketConnectionHandler. Message received: " + message[0]
+            )
+        }
+
+        var params = mapOf("room" to "streamer", "token" to CurrentUser.token)
+        var jObject = JSONObject(params)
+        mSoc.emit("joinRoom", jObject)
+
+        mSoc.on("nxtControl") {
+            Log.d("nxtControl", it[0].toString())
+        }
+        Log.d("mini", jObject.toString())
+    }
 
 
     @SuppressLint("RestrictedApi")
@@ -236,7 +273,7 @@ class CameraActivity : AppCompatActivity() {
                 .setMaxResolution(Size(320, 240))
                 .build()
                 .also {
-                    it.setSurfaceProvider(viewFinderValue.getSurfaceProvider())
+                    it.setSurfaceProvider(viewFinderValue.surfaceProvider)
                 }
 
             imageCapture = ImageCapture.Builder()

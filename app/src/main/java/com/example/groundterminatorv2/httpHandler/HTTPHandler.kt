@@ -20,6 +20,10 @@ class HTTPHandler {
         {
             Address= "http://$address:$port"
         }
+        fun getAddress(): String
+        {
+            return Address
+        }
 
         fun handlePostMethod(route: String, postData: String): HTTPResponse{
             val tmpRoute = resolveRoute(route)
@@ -46,6 +50,10 @@ class HTTPHandler {
             }
 
             return HTTPResponse(conn, response!!)
+        }
+
+        fun postMethod(route: String, postData: String): JSONObject?{
+            return null
         }
 
         // Resolves routes if starting without '/'
